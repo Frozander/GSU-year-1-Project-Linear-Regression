@@ -4,7 +4,26 @@
 
 void read_house_data(char* filename, House houses[]){
   printf("Reading file %s\n",filename);  
-  // TODO 
+  // TODO
+
+  FILE *openFile = fopen(filename, "r");
+  char readLine[128];
+
+  fgets(readLine, sizeof(readLine), openFile);
+
+  // TODO: Ask how we can change the function if there is a missing type
+  for(size_t i = 0; !feof(openFile); i++)
+  {
+  
+    // Possible problems:
+    //              not included in both   Not an int
+    //                         v               v
+    fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
+
+
+  }
+  
+  
   return ; 
 }
 
