@@ -16,7 +16,11 @@ void read_house_data(char* filename, House houses[]){
   {
   
     // Possible problems:
+<<<<<<< HEAD
     //              not included in both   Not an int
+=======
+    //               not included in both  Not an int
+>>>>>>> 0f49a6f25bd561c393c86dff833ddf954778075b
     //                         v               v
     fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
 
