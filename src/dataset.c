@@ -48,21 +48,6 @@ void read_house_data(char* filename, House houses[]){
       // TODO: THROW EXCEPTION
       break;
   }
-
-
-
-  // TODO: DELETE THIS AFTER IMPLEMENTING THE SWITCH CASE
-  for(size_t i = 0; !feof(openFile); i++)
-  {
-  
-    // Possible problems:
-    //              not included in both   Not an int
-    //                         v               v
-    fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d\n", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
-
-
-  }
-  
   
   return ; 
 }
