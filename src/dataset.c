@@ -11,6 +11,35 @@ void read_house_data(char* filename, House houses[]){
 
   fgets(readLine, sizeof(readLine), openFile);
 
+
+  int type;
+  // Tam emin olamadım o yüzden böyle bir şey denedim
+  // Type == 1 -> Train   Type == 0 -> Test  Type == -1 -> Error
+  if(0 == strcmp(readLine, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual")){
+    type = 1;
+  } else if (0 == strcmp(readLine, "Id,LotArea,Street,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual"))
+  {
+    type = 0;
+  } else type = -1;
+  
+
+  switch (type)
+  {
+    case 0:
+
+      break;
+    
+    case 1:
+
+      break;
+  
+    default:
+
+      break;
+  }
+
+
+
   // TODO: Ask how we can change the function if there is a missing type
   for(size_t i = 0; !feof(openFile); i++)
   {
@@ -18,7 +47,7 @@ void read_house_data(char* filename, House houses[]){
     // Possible problems:
     //              not included in both   Not an int
     //                         v               v
-    fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
+    fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d\n", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
 
 
   }
