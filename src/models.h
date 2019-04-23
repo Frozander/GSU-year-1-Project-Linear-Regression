@@ -14,6 +14,6 @@ void create_data_matrices(House* houses,int** X,int* y);
 int** get_transpose(int** A);
 int** get_inverse(int** A);
 int** get_multiplication(int** A, int** B);
-int** calculate_parameter(Hosue* houses);
+int** calculate_parameter(House* houses);
 
 #endif

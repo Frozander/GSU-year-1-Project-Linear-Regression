@@ -2,52 +2,16 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+//csv dosyalarındaki evlerin verisini okuma fonksyonu
 void read_house_data(char* filename, House houses[]){
-  printf("\nReading file %s",filename);  
-  // TODO
+  printf("\nReading file %s",filename); //Okunan dosya adı bilgisi bastırılıyor
+  //TODO
 
-  FILE *openFile = fopen(filename, "r");
-  if (openFile == NULL) {
-    printf("\nI/O Error: Could not read the target file '%s'", filename);
-    return;
-  }
+  /*
+  berkay-yildiz:
+  Program başka fonksyonlar eksik olduğu için compile edilemediğinden src/test_area_1.c dosyasında tekil olarak test aşamasında
+  */
 
-  char readLine[128];
-  fgets(readLine, sizeof(readLine), openFile);
-  int type;
-  // Tam emin olamadım o yüzden böyle bir şey denedim
-  // Type == 1 -> Train   Type == 0 -> Test  Type == -1 -> Error
-  if(0 == strcmp(readLine, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual")){
-    type = 1;
-  } else if (0 == strcmp(readLine, "Id,LotArea,Street,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual"))
-  {
-    type = 0;
-  } else type = -1;  
-
-  switch (type)
-  {
-    case 0:
-      // Test
-      for(size_t i = 0; !feof(openFile); i++)
-      {
-        fscanf(openFile, "%d,%d,%s,%d,%s,%d,%d,%d,%d\n", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].saleprice, houses[i].street, houses[i].yearbuilt);
-      }
-
-      break;    
-    case 1:
-      // Train
-      for(size_t i = 0; !feof(openFile); i++)
-      {
-        fscanf(openFile, "%d,%d,%s,%s,%d,%d,%d,%d\n", houses[i].id, houses[i].kitchenqual, houses[i].lotarea, houses[i].neighborhood, houses[i].overallcond, houses[i].overallqual, houses[i].street, houses[i].yearbuilt);
-      }
-
-      break;  
-    default:
-      // Error
-      printf("\nData Type Error: Unrecognised data type in the file '%s'", filename);
-      break;
-  }
-  
   return ; 
 }
 
