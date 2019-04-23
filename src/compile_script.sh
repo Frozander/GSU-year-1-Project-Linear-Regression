@@ -1,0 +1,1 @@
+gcc main.c dataset.c models.c -o main
