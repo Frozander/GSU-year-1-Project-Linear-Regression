@@ -45,7 +45,7 @@ void read_house_data(char* filename, House houses[]){
   /*
   berkay-yildiz:
   Burada nitelikleri sayıya çevirirme işlemini gerçekleştiremedim, build edip mainden test-no-1 i çağırırsan çıktıyı görebilirsin
-  Bunları sayıya çevridikten sonra buradaki eksiklikleri kontrol edebiliriz ve bu diziyi baz alarak formatlı okuma yapabiliriz.
+  bunları sayıya çevridikten sonra buradaki eksiklikleri kontrol edebiliriz ve bu diziyi baz alarak formatlı okuma yapabiliriz.
   */
 
 	}
