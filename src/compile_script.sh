@@ -1,1 +1,1 @@
-gcc main.c dataset.c models.c -o main
+gcc main.c models.c dataset.c -o main

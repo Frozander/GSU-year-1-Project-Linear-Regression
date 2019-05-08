@@ -56,7 +56,7 @@ int** get_multiplication(int** A, int** B){
 }
 
 
-int** calculate_parameter(int** X, int* y){
+int** calculate_parameter(House* houses){
   int** W;
   printf("Calculate parameters for dataset\n");
   // TODO
