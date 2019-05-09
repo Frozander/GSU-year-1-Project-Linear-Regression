@@ -152,17 +152,19 @@ House get_house_byid(int id, House * houses[]){
   int hashIndex = hash_code(id);
   House * tmp_house; 
   
-  if(houses[hashIndex] != NULL) {
-    tmp_house = houses[hashIndex];
-    if(tmp_house->nextHouse == NULL) {
-      return *tmp_house;
-    } else {
-      while (tmp_house->nextHouse != NULL) {
-        tmp_house = tmp_house->nextHouse;
-        if (tmp_house->id == id) return *tmp_house;
-      }
+  if(houses[hashIndex] != NULL) { //verilen hash değeri için tablodaki pointer NULL mu bakıyoruz
+    tmp_house = houses[hashIndex]; //NULL değilse adresi geçici bir pointera alıyoruz
+    if (tmp_house->id == id) return *tmp_house; //elimizdeki adresteki değer istediğimiz id ile eşleşiyor mu bakıyoruz eşleşiyorsa döndürüyoruz
+    while (tmp_house->nextHouse != NULL) { //eşleşmiyorsa sonraki adres varsa oraya bakıyoruz
+      tmp_house = tmp_house->nextHouse;
+      if (tmp_house->id == id) return *tmp_house;
     }
   }
+
+  /* berkay-yildiz:
+    eğer tabloda olmayan bir id girilirse pointerda kalan adres geri dönüyor, çok önemli sayılmaz ama sona doğru halledilmeli
+   */
+
 }
 
 House* get_neighborhoods(House house){
