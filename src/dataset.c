@@ -5,6 +5,17 @@
 #define HASH_TABLE_SIZE 100
 #define LINE_BUFFER_SIZE 1024
 
+//Daha kolay sorting için hardcoded int değerler
+#define ID 0
+#define LOTAREA 1
+#define STREET 2
+#define SALEPRICE 3
+#define NEIGHBORHOOD 4
+#define YEARBUILT 5
+#define OVERALLQUAL 6
+#define OVERALLCOND 7
+#define KITCHENQUAL 8
+
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {
   return id % HASH_TABLE_SIZE;
@@ -183,6 +194,7 @@ float* mean_sale_prices(House* houses,char* criter_name){
 void sort_houses(House* houses,char* criter_name){
   printf("Sort house by %s and save \n",criter_name);
   // TODO
+
 }
 
 
@@ -244,4 +256,284 @@ char * convert_kitchenqual_back (int value) {
     return 0;
     break;
   }
+}
+
+House* merge(House* in1, House* in2, int style){
+  House* res = NULL;
+
+  if (in1 == NULL) 
+      return (in2); 
+  else if (in2 == NULL) 
+      return (in1);
+
+  switch (style)
+  {
+  case ID:
+
+    if (in1->id <= in2->id)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, ID);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, ID);
+    }
+    return (res);
+
+    break;
+  
+  case LOTAREA:
+    
+    if (in1->id <= in2->id)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, ID);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, ID);
+    }
+    return (res);
+    
+    break;
+  
+  case STREET:
+    //String comparison
+    
+    
+
+    if (strcmp(in1->street, in2->street) <= 0)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, STREET);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, STREET);
+    }
+    return (res);
+    
+    break;
+
+  case SALEPRICE:
+    
+    if (in1->saleprice <= in2->saleprice)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE);
+    }
+    return (res);
+    
+    break;
+
+  case NEIGHBORHOOD:
+    //String comparison
+    if (strcmp(in1->neighborhood, in2->neighborhood) <= 0)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD);
+    }
+    return (res);
+    
+    break;
+  
+  case YEARBUILT:
+    
+    if (in1->yearbuilt <= in2->yearbuilt)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT);
+    }
+    return (res);
+    
+    break;
+  
+  case OVERALLQUAL:
+    
+    if (in1->overallqual <= in2->overallqual)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL);
+    }
+    return (res);
+    
+    break;
+
+  case OVERALLCOND:
+    
+    if (in1->overallcond <= in2->overallcond)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND);
+    }
+    return (res);
+    
+    break;
+
+  case KITCHENQUAL:
+    
+    if (in1->kitchenqual <= in2->kitchenqual)
+    {
+      res = in1;
+      res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL);
+    } else
+    {
+      res = in2;
+      res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL);
+    }
+    return (res);
+    
+    break;
+
+  default:
+    //yanlış girdi girildiyse id'ye göre sıralar
+    if (in1->id <= in2->id)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, ID);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, ID);
+      }
+      return (res);
+
+    break;
+  }
+    
+}
+
+void merge_sort(House ** list_head_ref, int style){
+
+  House* head = *list_head_ref;
+  House* first_node;
+  House* second_node;
+
+  if ((head == NULL) || (head->nextHouse == NULL)) //Eğer liste boşsa veya bir elemanı varsa foksiyondan çıkar
+  {
+    return;
+  }
+
+  //Listeyi ortadan ikiye bölüp first_node ve second_node pointerlarına atar
+  split_list(list_head_ref, first_node, second_node);
+  
+  switch (style)
+  {
+  case ID: //ID
+    merge_sort(&first_node, ID); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, ID);
+
+    *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
+    break;
+  
+  case LOTAREA:
+    merge_sort(&first_node, LOTAREA); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, LOTAREA);
+
+    *list_head_ref = merge(first_node, second_node, LOTAREA); //Recursion bittikten sonra listeler birleştirilir
+    break;
+  
+  case STREET:
+    merge_sort(&first_node, STREET); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, STREET);
+
+    *list_head_ref = merge(first_node, second_node, STREET); //Recursion bittikten sonra listeler birleştirilir
+    break;
+
+  case SALEPRICE:
+    merge_sort(&first_node, SALEPRICE); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, SALEPRICE);
+
+    *list_head_ref = merge(first_node, second_node, SALEPRICE); //Recursion bittikten sonra listeler birleştirilir
+    break;
+
+  case NEIGHBORHOOD:
+    merge_sort(&first_node, NEIGHBORHOOD); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, NEIGHBORHOOD);
+
+    *list_head_ref = merge(first_node, second_node, NEIGHBORHOOD); //Recursion bittikten sonra listeler birleştirilir
+    break;
+  
+  case YEARBUILT:
+    merge_sort(&first_node, YEARBUILT); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, YEARBUILT);
+
+    *list_head_ref = merge(first_node, second_node, YEARBUILT); //Recursion bittikten sonra listeler birleştirilir
+    break;
+  
+  case OVERALLQUAL:
+    merge_sort(&first_node, OVERALLQUAL); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, OVERALLQUAL);
+
+    *list_head_ref = merge(first_node, second_node, OVERALLQUAL); //Recursion bittikten sonra listeler birleştirilir
+    break;
+
+  case OVERALLCOND:
+    merge_sort(&first_node, OVERALLCOND); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, OVERALLCOND);
+
+    *list_head_ref = merge(first_node, second_node, OVERALLCOND); //Recursion bittikten sonra listeler birleştirilir
+    break;
+
+  case KITCHENQUAL:
+    merge_sort(&first_node, KITCHENQUAL); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, KITCHENQUAL);
+
+    *list_head_ref = merge(first_node, second_node, KITCHENQUAL); //Recursion bittikten sonra listeler birleştirilir
+    break;
+
+  default: //Eğer hiçbir değer girilmez ise ID ile sorting yapılır
+    merge_sort(&first_node, ID); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, ID);
+
+    *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
+    break;
+  }
+  
+}
+
+void split_list(House* input, House** first_half, House** second_half){
+
+  House* fast_node;
+  House* slow_node;
+
+  slow_node = input;
+  fast_node = input->nextHouse;
+
+  //Hızlı node iki ileri gider, yavaş node bir ileri gider
+  //Sonuç olarak hızlı node son değeri gösterirken yavaş node ortanca - 1 değeri gösterir
+  while (fast_node != NULL)
+  {
+    fast_node = fast_node->nextHouse;
+    if (fast_node != NULL)
+    {
+      slow_node = slow_node->nextHouse;
+      fast_node = fast_node->nextHouse;
+    }
+  }
+
+  *first_half = input;
+  *second_half = slow_node->nextHouse; // slow_node ortanca değerden bi geride olduğu için slow_node->nextHouse'u kullanıyoruz
+  slow_node->nextHouse = NULL;
 }
