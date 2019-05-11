@@ -5,16 +5,6 @@
 #define HASH_TABLE_SIZE 100
 #define LINE_BUFFER_SIZE 1024
 
-//Daha kolay sorting için hardcoded int değerler
-#define ID 0
-#define LOTAREA 1
-#define STREET 2
-#define SALEPRICE 3
-#define NEIGHBORHOOD 4
-#define YEARBUILT 5
-#define OVERALLQUAL 6
-#define OVERALLCOND 7
-#define KITCHENQUAL 8
 
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {

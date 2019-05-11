@@ -5,6 +5,15 @@
 #ifndef DATASET
 #define DATASET
 
+#define ID 0
+#define LOTAREA 1
+#define STREET 2
+#define SALEPRICE 3
+#define NEIGHBORHOOD 4
+#define YEARBUILT 5
+#define OVERALLQUAL 6
+#define OVERALLCOND 7
+#define KITCHENQUAL 8
 
 /*
  * Ornek ev veri yapisi
