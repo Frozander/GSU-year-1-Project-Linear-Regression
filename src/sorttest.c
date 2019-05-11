@@ -73,9 +73,11 @@ int main(int argc,char * argv[]){
 
         //Sort edildimi kontrol eder;
         House* tester = *ref;
+
+        //Liste düzgün sıralanmış mı diye kontrol eder
         while (tester->nextHouse != NULL)
         {
-            if (tester->id < tester->nextHouse->id)
+            if ((tester->id) > (tester->nextHouse->id))
             {
                 printf("Not Sorted!!!\n");
             }
