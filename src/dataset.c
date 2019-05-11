@@ -6,17 +6,6 @@
 #define HASH_TABLE_SIZE_TYPE_NEIGHBOR ('Z' - 'A') * 2
 #define LINE_BUFFER_SIZE 1024
 
-//Daha kolay sorting için hardcoded int değerler
-#define ID 0
-#define LOTAREA 1
-#define STREET 2
-#define SALEPRICE 3
-#define NEIGHBORHOOD 4
-#define YEARBUILT 5
-#define OVERALLQUAL 6
-#define OVERALLCOND 7
-#define KITCHENQUAL 8
-
 
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {
@@ -78,6 +67,7 @@ void place_house (House * house, House * houses[], int hash_type) {
       tmp_hp->nextHouseById = house;
     }
     break;
+
   case HASH_TYPE_NEIGHBORHOODS:
     hashIndex = hash_code_n(house->neighborhood);
     int c = 0;
@@ -136,6 +126,29 @@ void read_house_data(char* filename, House * hById[], House * hByN[]){
   fclose(fp);
 }
 
+//verilen hash table ı House yapılarındaki NextHouse pointerını değiştirerek link list hale getirir
+House* linearise_hash_table (House * ht[], int hash_type) {
+  House * tmp;
+  int counter;
+  switch (hash_type)
+  {
+  case HASH_TYPE_ID:
+    
+    counter = ht[0]->id;
+    tmp = get_house_byid(counter, ht);
+    while (get_house_byid(counter, ht) != NULL) {    
+      tmp->nextHouse = get_house_byid(counter, ht);
+      counter++;
+      tmp = tmp->nextHouse;
+    }
+    tmp->nextHouse = NULL;
+    return ht[0];
+    break;
+  
+  default:
+    break;
+  }
+}
 
 //Aldığı hash table ın haritasını çıkardır (elemanların id lerini bastırır)
 void create_hash_table_tree(House * houses[], int hash_type) {
@@ -171,47 +184,88 @@ void create_hash_table_tree(House * houses[], int hash_type) {
 
 
 //Aldığı evi ekrana yazdıran fonksyon
-void print_house(House house){
+void print_house(House * house, int style, int limit){
 
-  printf(
-    "\n%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s\n", //Üst bilgi kısmını yazdırıyoruz
-    "id",
-    "lotarea",
-    "street",
-    "saleprice",
-    "neighborhood",
-    "yearbuilt",
-    "overallqual",
-    "overallcond",
-    "kitchenqual"
-  );
-
-  printf(
-    "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
-    house.id,
-    house.lotarea,
-    house.street,
-    house.saleprice,
-    house.neighborhood,
-    house.yearbuilt,
-    house.overallqual,
-    house.overallcond,
-    convert_kitchenqual_back(house.kitchenqual)
-  );
+  if(style) {
+    printf(
+      "\n%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s\n", //Üst bilgi kısmını yazdırıyoruz
+      "id",
+      "lotarea",
+      "street",
+      "saleprice",
+      "neighborhood",
+      "yearbuilt",
+      "overallqual",
+      "overallcond",
+      "kitchenqual"
+    );
+  }
+  
+  if(style == MULTI) {
+    if (limit == LIMITLESS) {
+      while (house->nextHouse != NULL) {
+        printf(
+          "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+          house->id,
+          house->lotarea,
+          house->street,
+          house->saleprice,
+          house->neighborhood,
+          house->yearbuilt,
+          house->overallqual,
+          house->overallcond,
+          convert_kitchenqual_back(house->kitchenqual)
+        );
+        house = house->nextHouse;
+      }
+      print_house(house, SINGLE_WITHOUT_TOP, LIMITLESS);//döngüde basılmayan son değeri baskıyoruz
+    } else {
+      for (int i = 0; i < limit; i++) {
+        printf(
+          "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+          house->id,
+          house->lotarea,
+          house->street,
+          house->saleprice,
+          house->neighborhood,
+          house->yearbuilt,
+          house->overallqual,
+          house->overallcond,
+          convert_kitchenqual_back(house->kitchenqual)
+        );
+        house = house->nextHouse;
+      }
+    }
+    
+  }else if(style == SINGLE_WITH_TOP || style == SINGLE_WITHOUT_TOP){
+    printf(
+      "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+      house->id,
+      house->lotarea,
+      house->street,
+      house->saleprice,
+      house->neighborhood,
+      house->yearbuilt,
+      house->overallqual,
+      house->overallcond,
+      convert_kitchenqual_back(house->kitchenqual)
+    );
+  }
+  
   
 }
 
 //Id si verilen evi döndüren fonksyon
-House get_house_byid(int id, House * houses[]){
+House* get_house_byid(int id, House * houses[]){
   int hashIndex = hash_code(id);
   House * tmp_house; 
   
   if(houses[hashIndex] != NULL) { //verilen hash değeri için tablodaki pointer NULL mu bakıyoruz
     tmp_house = houses[hashIndex]; //NULL değilse adresi geçici bir pointera alıyoruz
-    if (tmp_house->id == id) return *tmp_house; //elimizdeki adresteki değer istediğimiz id ile eşleşiyor mu bakıyoruz eşleşiyorsa döndürüyoruz
+    if (tmp_house->id == id) return tmp_house; //elimizdeki adresteki değer istediğimiz id ile eşleşiyor mu bakıyoruz eşleşiyorsa döndürüyoruz
     while (tmp_house->nextHouseById != NULL) { //eşleşmiyorsa sonraki adres varsa oraya bakıyoruz
       tmp_house = tmp_house->nextHouseById;
-      if (tmp_house->id == id) return *tmp_house;
+      if (tmp_house->id == id) return tmp_house;
     }
   }
 
@@ -223,7 +277,7 @@ House get_house_byid(int id, House * houses[]){
 
 House* get_neighborhoods(House * house, House * houses[]){
   int hashIndex = hash_code_n(house->neighborhood);
-  while (houses[hashIndex]->neighborhood != house->neighborhood) {
+  while (strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
     hashIndex++;
     hashIndex %= HASH_TABLE_SIZE_TYPE_NEIGHBOR;
   }
@@ -245,7 +299,7 @@ void mean_sale_prices(House* houses_head, int criter_name){
   char tmp_c[15];
 
   FILE * fp = fopen("mean_sale_prices_results.txt", "w");
-  sort_houses(houses_head, criter_name);
+  houses_head = sort_houses(houses_head, criter_name);
 
   while (houses_head->nextHouse != NULL) {
     switch (criter_name)
@@ -301,7 +355,7 @@ void mean_sale_prices(House* houses_head, int criter_name){
 }
 
 
-void sort_houses(House* houses, int criter_name){
+House* sort_houses(House* houses, int criter_name){
 
 }
 
