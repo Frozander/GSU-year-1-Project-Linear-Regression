@@ -5,7 +5,6 @@
 #define HASH_TABLE_SIZE 100
 #define LINE_BUFFER_SIZE 1024
 
-
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {
   return id % HASH_TABLE_SIZE;
@@ -248,7 +247,7 @@ char * convert_kitchenqual_back (int value) {
   }
 }
 
-House* merge(House* in1, House* in2, int style){
+House* merge(House* in1, House* in2, int criter_name){
   House* res = NULL;
 
   if (in1 == NULL) 
@@ -256,7 +255,7 @@ House* merge(House* in1, House* in2, int style){
   else if (in2 == NULL) 
       return (in1);
 
-  switch (style)
+  switch (criter_name)
   {
   case ID:
 
@@ -414,7 +413,7 @@ House* merge(House* in1, House* in2, int style){
     
 }
 
-House* merge_sort(House ** list_head_ref, int style){
+void merge_sort(House ** list_head_ref, int criter_name){
 
   House* head = *list_head_ref;
   House* first_node;
@@ -426,9 +425,9 @@ House* merge_sort(House ** list_head_ref, int style){
   }
 
   //Listeyi ortadan ikiye bölüp first_node ve second_node pointerlarına atar
-  split_list(list_head_ref, first_node, second_node);
+  split_list(head, &first_node, &second_node);
   
-  switch (style)
+  switch (criter_name)
   {
   case ID: //ID
     merge_sort(&first_node, ID); //Her iki node için de recursive merge_sort çağırılır.
@@ -500,8 +499,6 @@ House* merge_sort(House ** list_head_ref, int style){
     *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
     break;
   }
-
-  return head;
   
 }
 
@@ -528,4 +525,33 @@ void split_list(House* input, House** first_half, House** second_half){
   *first_half = input;
   *second_half = slow_node->nextHouse; // slow_node ortanca değerden bi geride olduğu için slow_node->nextHouse'u kullanıyoruz
   slow_node->nextHouse = NULL;
+}
+
+// TEST FONKSIYONUDUR SILINEBILIR
+
+//Hash table'dan linked list döndüren bir fonksiyon
+House** pull_from_table_by_id_as_headref(int id, House* house_list[]){
+  int hash_value = hash_code(id);
+  
+  if (house_list[hash_value] == NULL)
+  {
+    printf("Invalid hash! Returning the smallest viable hash\n");
+    return (&house_list[0]);
+  }
+  
+  return (&house_list[hash_value]);
+}
+
+void print_list(House* list_input){
+  
+  if (list_input != NULL)
+  {
+    do
+    {
+      print_house(*list_input);
+      list_input = list_input -> nextHouse;
+    } while (list_input->nextHouse != NULL);
+    
+  }
+  
 }

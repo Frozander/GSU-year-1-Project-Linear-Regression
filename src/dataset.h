@@ -45,9 +45,11 @@ void sort_houses(House* houses,char* criter_name);
 void create_hash_table_tree(House * houses[] );
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
-House* merge_sort(House ** list, int style);
+void merge_sort(House ** list, int criter_name);
 void split_list(House* input, House** first_half, House** second_half);
-House* merge(House* in1, House* in2, int style);
+House* merge(House* in1, House* in2, int criter_name);
+House** pull_from_table_by_id_as_headref(int id, House* house_list[]);
+void print_list(House* list_input);
 
 
 
