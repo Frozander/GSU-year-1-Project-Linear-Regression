@@ -414,7 +414,7 @@ House* merge(House* in1, House* in2, int style){
     
 }
 
-void merge_sort(House ** list_head_ref, int style){
+House* merge_sort(House ** list_head_ref, int style){
 
   House* head = *list_head_ref;
   House* first_node;
@@ -500,6 +500,8 @@ void merge_sort(House ** list_head_ref, int style){
     *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
     break;
   }
+
+  return head;
   
 }
 

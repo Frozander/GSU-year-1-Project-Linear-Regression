@@ -45,7 +45,7 @@ void sort_houses(House* houses,char* criter_name);
 void create_hash_table_tree(House * houses[] );
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
-void merge_sort(House ** list, int style);
+House* merge_sort(House ** list, int style);
 void split_list(House* input, House** first_half, House** second_half);
 House* merge(House* in1, House* in2, int style);
 
