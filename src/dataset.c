@@ -2,12 +2,30 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define HASH_TABLE_SIZE 100
+#define HASH_TABLE_SIZE_TYPE_ID 100
+#define HASH_TABLE_SIZE_TYPE_NEIGHBOR ('Z' - 'A') * 2
 #define LINE_BUFFER_SIZE 1024
+
+//Daha kolay sorting için hardcoded int değerler
+#define ID 0
+#define LOTAREA 1
+#define STREET 2
+#define SALEPRICE 3
+#define NEIGHBORHOOD 4
+#define YEARBUILT 5
+#define OVERALLQUAL 6
+#define OVERALLCOND 7
+#define KITCHENQUAL 8
+
 
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {
-  return id % HASH_TABLE_SIZE;
+  return id % HASH_TABLE_SIZE_TYPE_ID;
+}
+
+//komşuluk değeri için hash değeri döndürür
+int hash_code_n(char * n) {
+  return ((n[0] - 'A') * 2) % HASH_TABLE_SIZE_TYPE_NEIGHBOR;
 }
 
 //Aldığı csv dosyası satırındaki evi çözümleyip, ev için oluşturduğu alana bilgileri yazan ve alanın pointerını döndüren fonksyon
@@ -40,30 +58,55 @@ House * write_house(char * c) {
 }
 
 //Aldığı ev pointerını hash tableda uygun yere yerleştiren fonksyon
-void place_house (House * house, House * houses[] ) { 
+void place_house (House * house, House * houses[], int hash_type) { 
   House * tmp_hp;
 
-  int hashIndex = hash_code(house->id); //hashı alıyoruz
+  int hashIndex;
 
-
-  if(houses[hashIndex] == NULL) {
-    houses[hashIndex] = house;
-  } else {
-    tmp_hp = houses[hashIndex];
-    while (tmp_hp->nextHouse != NULL)
-    {
-      tmp_hp = tmp_hp->nextHouse;
+  switch (hash_type)
+  {
+  case HASH_TYPE_ID:
+    hashIndex = hash_code(house->id);
+    if(houses[hashIndex] == NULL) {
+      houses[hashIndex] = house;
+    } else {
+      tmp_hp = houses[hashIndex];
+      while (tmp_hp->nextHouseById != NULL)
+      {
+        tmp_hp = tmp_hp->nextHouseById;
+      }
+      tmp_hp->nextHouseById = house;
     }
-    tmp_hp->nextHouse = house;
+    break;
+  case HASH_TYPE_NEIGHBORHOODS:
+    hashIndex = hash_code_n(house->neighborhood);
+    int c = 0;
+    while (houses[hashIndex] != NULL && strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
+      hashIndex++;
+      hashIndex %= HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+    }
+    
+    if(houses[hashIndex] == NULL) {
+      houses[hashIndex] = house;
+    } else {
+      tmp_hp = houses[hashIndex];
+      while (tmp_hp->nextHouseByNeighbor != NULL) {
+        tmp_hp = tmp_hp->nextHouseByNeighbor;
+      }
+      tmp_hp->nextHouseByNeighbor = house;
+    }
+    break;
+  default:
+    hashIndex = house->id;
+    break;
   }
-
 }
 
 
-
 //Csv dosyalarındaki evlerin verisini okuma fonksyonu
-void read_house_data(char* filename, House* houses[]){
+void read_house_data(char* filename, House * hById[], House * hByN[]){
   char buffer[LINE_BUFFER_SIZE];
+  House * tmp;
   
   FILE *fp = fopen( filename, "r"); //dosyayı okumak için açıyoruz
 
@@ -72,8 +115,10 @@ void read_house_data(char* filename, House* houses[]){
     fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
 
     while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
-      fgets(buffer, LINE_BUFFER_SIZE, fp);
-      place_house(write_house(buffer), houses); //okunan satırı alana yazma fonksyonu ile yazıp dönen House pointerını da yerleşirme fonksyonu ile hash_table içine yerleştiriyoruz
+      fgets(buffer, LINE_BUFFER_SIZE, fp); 
+      tmp = write_house(buffer);
+      place_house(tmp, hById, HASH_TYPE_ID);
+      place_house(tmp, hByN, HASH_TYPE_NEIGHBORHOODS);
     }
 
     /* berkay-yildiz:
@@ -91,26 +136,35 @@ void read_house_data(char* filename, House* houses[]){
   fclose(fp);
 }
 
+
 //Aldığı hash table ın haritasını çıkardır (elemanların id lerini bastırır)
-void create_hash_table_tree(House * houses[] ) {
+void create_hash_table_tree(House * houses[], int hash_type) {
 
 
   /*  berkay-yildiz:
   burayı yapıyı kontrol etmek için yazdım.
   Daha sonrasında hash table ı başka şekillerde hashlarsak buradan nasıl bir yapı oluştuğunu kolayca görebiliriz.
   */
-  
-  for(int i = 0; i < HASH_TABLE_SIZE; i++) {
+  int size = (hash_type == HASH_TYPE_ID) ? HASH_TABLE_SIZE_TYPE_ID : HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+  for(int i = 0; i < size; i++) {
     House * tmp;
     printf("\nhash: %-3d| ", i);
     if(houses[i] == NULL) printf ("null");
     else {
       tmp = houses[i];
       printf("%-5d", tmp->id);
-      while(tmp->nextHouse != NULL) {
-        tmp = tmp->nextHouse;
-        printf("%-5d", tmp->id);
+      if(hash_type == HASH_TYPE_ID) {
+        while(tmp->nextHouseById != NULL) {
+          tmp = tmp->nextHouseById;
+          printf("%-5d", tmp->id);
+        }
+      } else if(hash_type == HASH_TYPE_NEIGHBORHOODS) {
+        while(tmp->nextHouseByNeighbor != NULL) {
+          tmp = tmp->nextHouseByNeighbor;
+          printf("%-7s", tmp->neighborhood);
+        }
       }
+      
     }
   }
 }
@@ -155,8 +209,8 @@ House get_house_byid(int id, House * houses[]){
   if(houses[hashIndex] != NULL) { //verilen hash değeri için tablodaki pointer NULL mu bakıyoruz
     tmp_house = houses[hashIndex]; //NULL değilse adresi geçici bir pointera alıyoruz
     if (tmp_house->id == id) return *tmp_house; //elimizdeki adresteki değer istediğimiz id ile eşleşiyor mu bakıyoruz eşleşiyorsa döndürüyoruz
-    while (tmp_house->nextHouse != NULL) { //eşleşmiyorsa sonraki adres varsa oraya bakıyoruz
-      tmp_house = tmp_house->nextHouse;
+    while (tmp_house->nextHouseById != NULL) { //eşleşmiyorsa sonraki adres varsa oraya bakıyoruz
+      tmp_house = tmp_house->nextHouseById;
       if (tmp_house->id == id) return *tmp_house;
     }
   }
@@ -167,22 +221,88 @@ House get_house_byid(int id, House * houses[]){
 
 }
 
-House* get_neighborhoods(House house){
-  printf("Get neighborhoods of house with id %d\n",house.id);
-  House * tmp;
-  // TODO
-  return tmp;
+House* get_neighborhoods(House * house, House * houses[]){
+  int hashIndex = hash_code_n(house->neighborhood);
+  while (houses[hashIndex]->neighborhood != house->neighborhood) {
+    hashIndex++;
+    hashIndex %= HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+  }
+  House * tmp = houses[hashIndex];
+  while (tmp->nextHouseByNeighbor != NULL) {
+    tmp->nextHouse = tmp->nextHouseByNeighbor;
+    tmp = tmp->nextHouseByNeighbor;
+  }
+  tmp->nextHouse = NULL;
+
+  return houses[hashIndex];
 }
 
-float* mean_sale_prices(House* houses,char* criter_name){
-  printf("Calculate mean sale prices by %s \n",criter_name);
-  float * tmp;
-  // TODO
-  return tmp;
+void mean_sale_prices(House* houses_head, int criter_name){
+  int sum = 0;
+  int counter = 0;
+  int counter_general = 0;
+  int tmp_i;
+  char tmp_c[15];
+
+  FILE * fp = fopen("mean_sale_prices_results.txt", "w");
+  sort_houses(houses_head, criter_name);
+
+  while (houses_head->nextHouse != NULL) {
+    switch (criter_name)
+    {
+    case LOTAREA:
+      if(houses_head->lotarea != tmp_i) {
+        if(counter_general != 0) {
+          printf("%d | %d\n", tmp_i, sum/counter);
+          fprintf(fp, "%d | %d\n", tmp_i, sum/counter);
+        } 
+        tmp_i = houses_head->lotarea;
+        sum = 0;
+        counter = 0;
+      }
+      sum += houses_head->saleprice;
+      counter++;
+      break;
+    case STREET:
+      if(!strcmp(houses_head->street,tmp_c)) {
+        if(counter_general != 0) {
+          printf("%s | %d\n", tmp_c, sum/counter);
+          fprintf(fp, "%s | %d\n", tmp_c, sum/counter);
+        } 
+        strcpy(tmp_c,houses_head->street);
+        sum = 0;
+        counter = 0;
+      }
+      sum += houses_head->saleprice;
+      counter++;
+      break;
+    case NEIGHBORHOOD:
+
+      break;
+    case YEARBUILT:
+
+      break;
+    case OVERALLQUAL:
+
+      break;
+    case OVERALLCOND:
+
+      break;
+    case KITCHENQUAL:
+
+      break;
+    
+    default:
+      break;
+    }
+    counter++;
+    houses_head = houses_head->nextHouse;
+  }
 }
-void sort_houses(House* houses,char* criter_name){
-  printf("Sort house by %s and save \n",criter_name);
-  // TODO
+
+
+void sort_houses(House* houses, int criter_name){
+
 }
 
 

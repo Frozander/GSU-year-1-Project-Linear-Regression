@@ -6,11 +6,16 @@
 char * csv_test_data_directory = "../data/data_test.csv";
 char * csv_train_data_directory = "../data/data_train.csv";
 
-House* houses[HASH_TABLE_SIZE];
+House* house_list_head;
+House* housesById[HASH_TABLE_SIZE];
+House* housesByNeighbor[HASH_TABLE_SIZE];
 
 int main(int argc,char * argv[]){
-  read_house_data(csv_train_data_directory, houses);
-  create_hash_table_tree(houses);
+  read_house_data(csv_train_data_directory, housesById, housesByNeighbor);
+
+  create_hash_table_tree(housesById, HASH_TYPE_ID);
+  create_hash_table_tree(housesByNeighbor, HASH_TYPE_NEIGHBORHOODS);
+
   int cevap = 1;
   while(cevap!=0){
     printf("\nEmlak Programina Hosgeldiniz!\n");
@@ -34,7 +39,7 @@ int main(int argc,char * argv[]){
       int tmp_id = 0;
       printf("ID degeri girin: ");
       scanf("%d", &tmp_id);
-      print_house(get_house_byid(tmp_id, houses));
+      print_house(get_house_byid(tmp_id, housesById));
      }
      else if (cevap==3){
       printf("Komsu evler \n");
