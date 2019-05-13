@@ -299,7 +299,7 @@ void mean_sale_prices(House* houses_head, int criter_name){
   char tmp_c[15];
 
   FILE * fp = fopen("mean_sale_prices_results.txt", "w");
-  houses_head = sort_houses(houses_head, criter_name);
+  sort_houses(&houses_head, criter_name);
 
   while (houses_head->nextHouse != NULL) {
     switch (criter_name)
@@ -355,7 +355,7 @@ void mean_sale_prices(House* houses_head, int criter_name){
 }
 
 
-House* sort_houses(House* houses, int criter_name){
+void sort_houses(House** houses, int criter_name){
 
 }
 

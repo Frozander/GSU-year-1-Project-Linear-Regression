@@ -57,7 +57,7 @@ House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
 void mean_sale_prices(House* houses_head,int criter_name);
-House* sort_houses(House* houses, int criter_name);
+void sort_houses(House** houses, int criter_name);
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);

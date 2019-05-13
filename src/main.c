@@ -66,10 +66,10 @@ int main(int argc,char * argv[]){
       printf("En yuksek fiyatli evler\n");
       printf("Kac ev gormek istersiniz \n");
       int limit = 0;
-      printf("ID degeri girin: ");
+      printf("Ev sayisi girin: ");
       scanf("%d", &limit);
-      House * head;
-      head = sort_houses(linearise_hash_table(housesById, HASH_TYPE_ID), SALEPRICE);
+      House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+      sort_houses(&head, SALEPRICE);
       print_house(head, MULTI, limit);
     }
     else if (cevap==6){
