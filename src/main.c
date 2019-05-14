@@ -27,6 +27,7 @@ int main(int argc,char * argv[]){
     printf("6 - Sirali ev listesini kaydet\n");
     printf("7 - Fiyat tahmini yap\n");
     printf("8 - Hash tablosunu ekrana bas\n");
+    printf("9 - Evleri kritere göre sıralı bastır\n");
     printf("Programdan cikmak icin 0 a basiniz.\n");
     scanf("%d",&cevap);
     if (cevap==1){
@@ -58,9 +59,25 @@ int main(int argc,char * argv[]){
       print_house(tmp, MULTI, LIMITLESS); 
     }
     else if(cevap==4){
-      printf("Ortalama satislar\n");
-        // TODO
-        // mean_sale_prices
+      int c = 0;
+      int c_data = 0;
+      printf("Verilen kritere gore ortalama ev fiyatlarini bulma\n ");
+      printf("Hangi kriter isteniyor?\n");
+      printf(" LOTAREA | 1 \n STREET | 2 \n NEIGHBORHOOD | 4\n YEARBUILT | 5\n OVERALLQUAL | 6\n OVERALLCOND | 7\n KITCHENQUAL | 8\n");
+      printf("Seciminizi girin: ");
+      scanf("%d", &c);
+
+      if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c== YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
+        if(c == LOTAREA || c==YEARBUILT) {
+          printf ("Ortalamalar kaclik araliklara gore belirlensin?\n");
+          printf("Aralik degeri girin: ");
+          scanf("%d", &c_data);
+        } 
+        House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        mean_sale_prices(head, c, c_data);
+      }else {
+        printf("Hatali bir deger girdiniz\n");
+      }
     }
     else if (cevap==5){
       printf("En yuksek fiyatli evler\n");
@@ -84,6 +101,22 @@ int main(int argc,char * argv[]){
       create_hash_table_tree(housesById, HASH_TYPE_ID);
       printf("NEIGHBORORHOODS Icin Hash Tablosu\n");
       create_hash_table_tree(housesByNeighbor, HASH_TYPE_NEIGHBORHOODS);
+    }
+    else if (cevap == 9) {
+      printf("Sirali olarak evleri bastir\n");
+      int c = 0;
+      printf("Hangi kriter isteniyor?\n");
+      printf(" LOTAREA | 1 \n STREET | 2 \n NEIGHBORHOOD | 4\n YEARBUILT | 5\n OVERALLQUAL | 6\n OVERALLCOND | 7\n KITCHENQUAL | 8\n");
+      printf("Seciminizi girin: ");
+      scanf("%d", &c);
+
+      if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c==YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
+        House * tmp_head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        sort_houses(&tmp_head, c);
+        print_house(tmp_head, MULTI, LIMITLESS);
+      } else {
+        printf("Hatali giris");
+      }
     }
     printf("Programdan cikiliyor\n");
   }

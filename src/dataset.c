@@ -291,62 +291,122 @@ House* get_neighborhoods(House * house, House * houses[]){
   return houses[hashIndex];
 }
 
-void mean_sale_prices(House* houses_head, int criter_name){
-  int sum = 0;
+void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
+  //Lotarea ve Yearbuilt için
+  int price_sum = 0;
+  int avg_sum = 0;
+  int keeper = 0;
+
+  //Diğerleri için
   int counter = 0;
-  int counter_general = 0;
-  int tmp_i;
+  int tmp_i = 0;
+  int tmp_i_old = 0;
   char tmp_c[15];
+  char tmp_c_old[15];
 
   FILE * fp = fopen("mean_sale_prices_results.txt", "w");
   sort_houses(&houses_head, criter_name);
+
+  switch (criter_name)
+    {
+    case LOTAREA:
+      keeper = houses_head->lotarea;
+      printf("%s | %-20s | %-10s\n", "Araliktaki Ev Sayisi", "Ort Lotarea", "Ort Fiyat");
+
+      break;
+    case STREET:
+    
+      break;
+    case NEIGHBORHOOD:
+      
+      break;
+    case YEARBUILT:
+      keeper = houses_head->yearbuilt;
+      break;
+    case OVERALLQUAL:
+      
+      break;
+    
+      break;
+    case KITCHENQUAL:
+      
+      break;
+    
+    default:
+      break;
+    }
 
   while (houses_head->nextHouse != NULL) {
     switch (criter_name)
     {
     case LOTAREA:
-      if(houses_head->lotarea != tmp_i) {
-        if(counter_general != 0) {
-          printf("%d | %d\n", tmp_i, sum/counter);
-          fprintf(fp, "%d | %d\n", tmp_i, sum/counter);
-        } 
-        tmp_i = houses_head->lotarea;
-        sum = 0;
-        counter = 0;
+      tmp_i = houses_head->lotarea;
+      if(tmp_i - keeper > criter_data) {
+        printf("(%d - %d) %d | %-20d | %-10d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter));
+        price_sum = avg_sum = counter = 0;
+        keeper = tmp_i;
       }
-      sum += houses_head->saleprice;
+      price_sum += houses_head->saleprice;
+      avg_sum += tmp_i;
       counter++;
+      tmp_i_old = tmp_i;
       break;
     case STREET:
-      if(!strcmp(houses_head->street,tmp_c)) {
-        if(counter_general != 0) {
-          printf("%s | %d\n", tmp_c, sum/counter);
-          fprintf(fp, "%s | %d\n", tmp_c, sum/counter);
-        } 
-        strcpy(tmp_c,houses_head->street);
-        sum = 0;
-        counter = 0;
-      }
-      sum += houses_head->saleprice;
-      counter++;
+    printf("aka_street\n");
+      strcpy(tmp_c_old, tmp_c);
+      strcpy(tmp_c, houses_head->street);
+      if(strcmp(tmp_c, tmp_c_old)) {
+        printf("%s | %d\n", tmp_c_old, counter);
+        counter = 1;
+      } else counter ++;
       break;
     case NEIGHBORHOOD:
+      strcpy(tmp_c_old, tmp_c);
+      strcpy(tmp_c, houses_head->neighborhood);
+      if(strcmp(tmp_c, tmp_c_old)) {
+        printf("%s | %d\n", tmp_c_old, counter);
+        counter = 1;
+      } else counter ++;
 
       break;
     case YEARBUILT:
-
+      if(houses_head->yearbuilt - keeper > criter_data) {
+        printf("%d | %d\n", (avg_sum/counter), (price_sum/counter));
+        price_sum = avg_sum = counter = 0;
+        keeper = houses_head->yearbuilt;
+      }
+      price_sum += houses_head->saleprice;
+      avg_sum += houses_head->yearbuilt;
+      counter++;
       break;
     case OVERALLQUAL:
+      tmp_i_old = tmp_i;
+      tmp_i = houses_head->overallqual;
+      if(tmp_i != tmp_i_old) {
+        printf("%d | %d\n", tmp_i_old, counter);
+        counter = 1;
+      } else counter ++;
 
       break;
     case OVERALLCOND:
-
+      tmp_i_old = tmp_i;
+      tmp_i = houses_head->overallcond;
+      if(tmp_i != tmp_i_old) {
+        printf("%d | %d\n", tmp_i_old, counter);
+        counter = 1;
+      } else counter ++;
       break;
     case KITCHENQUAL:
-
+      tmp_i_old = tmp_i;
+      tmp_i = houses_head->kitchenqual;
+      if(tmp_i != tmp_i_old) {
+        printf("%d | %d\n", tmp_i_old, counter);
+        counter = 1;
+      } else counter ++;
       break;
     
     default:
+    printf("hatali giris");
       break;
     }
     counter++;
@@ -355,7 +415,7 @@ void mean_sale_prices(House* houses_head, int criter_name){
 }
 
 void sort_houses(House** houses, int criter_name){
-
+  merge_sort(houses, criter_name);
 }
 
 
@@ -446,14 +506,14 @@ House* merge(House* in1, House* in2, int criter_name){
   
   case LOTAREA:
     
-    if (in1->id <= in2->id)
+    if (in1->lotarea <= in2->lotarea)
     {
       res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, ID);
+      res->nextHouse = merge(in1->nextHouse, in2, LOTAREA);
     } else
     {
       res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, ID);
+      res->nextHouse = merge(in1, in2->nextHouse, LOTAREA);
     }
     return (res);
     
@@ -697,33 +757,4 @@ void split_list(House* input, House** first_half, House** second_half){
   *first_half = input;
   *second_half = slow_node->nextHouse; // slow_node ortanca değerden bi geride olduğu için slow_node->nextHouse'u kullanıyoruz
   slow_node->nextHouse = NULL;
-}
-
-// TEST FONKSIYONUDUR SILINEBILIR
-
-//Hash table'dan linked list döndüren bir fonksiyon
-House** pull_from_table_by_id_as_headref(int id, House* house_list[]){
-  int hash_value = hash_code(id);
-  
-  if (house_list[hash_value] == NULL)
-  {
-    printf("Invalid hash! Returning the smallest viable hash\n");
-    return (&house_list[0]);
-  }
-  
-  return (&house_list[hash_value]);
-}
-
-void print_list(House* list_input){
-  
-  if (list_input != NULL)
-  {
-    do
-    {
-      print_house(*list_input);
-      list_input = list_input -> nextHouse;
-    } while (list_input->nextHouse != NULL);
-    
-  }
-  
 }
