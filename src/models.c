@@ -24,7 +24,26 @@ int model_by_similarity(House* houses,House new_house){
   return price;
 }
 
-
+Matrix* create_matrix(int line, int collumn){
+  // Yeni bir iki boyutlu array (Matrix) oluşturulur
+  Matrix* new_matrix = malloc(sizeof(Matrix));
+  // Daha sonra kullanmak için boyutu satır ve sütun şeklinde saklayan değerler atanır
+  new_matrix->lines = line;
+  new_matrix->collmuns = collumn;
+  // Verilerin tutulduğu values double** iki boyutlu arrayinin 1. boyutu oluşturulur (satır)
+  new_matrix->values = malloc(sizeof(double*) * line);
+  //For düngüsü ile 1. boyuttaki tüm değerler için sütunlar oluşturulur
+  for (size_t i = 0; i < new_matrix->collmuns; i++)
+  {
+    new_matrix->values[i] = malloc(sizeof(double) * collumn);
+    //ikinci bir for döngüsü ile arraydeki tüm veriler sıfırlanır
+    for (size_t j = 0; j < collumn; j++)
+    {
+      new_matrix->values[i][j] = 0;
+    }
+  }
+  return new_matrix;
+}
 
 void create_data_matrices(House* houses,int** X,int* y){
   printf("Create data matrices from dataset\n");
@@ -44,6 +63,10 @@ int** get_inverse(int** A){
   int** Ainverse;
   printf("Get inverse\n");
   // TODO
+  /*  Frozander
+    Inverse matrix sadece 2x2 fonksiyonlarda olduğu için
+    onlara özel bir yöntem kullanılacak
+    */
   return Ainverse;
 }
 
