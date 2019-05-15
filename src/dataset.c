@@ -291,6 +291,11 @@ House* get_neighborhoods(House * house, House * houses[]){
   return houses[hashIndex];
 }
 
+void limit_list(House* houses_head, int criter_name, int min, int max){
+  sort_houses(&houses_head, criter_name);
+
+}
+
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
   //Lotarea ve Yearbuilt için
   int price_sum = 0;
@@ -311,8 +316,9 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
     {
     case LOTAREA:
       keeper = houses_head->lotarea;
-      printf("%s | %-20s | %-10s\n", "Araliktaki Ev Sayisi", "Ort Lotarea", "Ort Fiyat");
-
+      printf("\033[1;31m"); //Kırmızı bastırmak için
+      printf("\n%-25s%-25s%-25s%-25s%-25s\n", "Min Lotarea", "Max Lotarea", "Ev Sayısı", "Ortalama Lotarea", "Ortalama Fiyat");
+      printf("\033[0m"); //Standart renkte bastırmak için
       break;
     case STREET:
     
@@ -340,9 +346,13 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
     switch (criter_name)
     {
     case LOTAREA:
+    /*
+    berkay-yildiz:
+    Burada sonuçlarda anlamadığım şekilde hata var. Ortalama değerler çok anlamsız çıkıyor, neden olduğunu bulamadım.
+    */
       tmp_i = houses_head->lotarea;
       if(tmp_i - keeper > criter_data) {
-        printf("(%d - %d) %d | %-20d | %-10d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter));
+        printf("%-25d%-25d%-25d%-25d%-25d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter-1));
         price_sum = avg_sum = counter = 0;
         keeper = tmp_i;
       }
@@ -414,8 +424,10 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
   }
 }
 
-void sort_houses(House** houses, int criter_name, int order){
-  merge_sort(houses, criter_name, order);
+//link list olarak alınan evleri sıralayan fonksyon
+House* sort_houses(House** houses, int criter_name){
+  merge_sort(houses, criter_name);
+  return *houses;
 }
 
 

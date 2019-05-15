@@ -27,6 +27,7 @@
 #define OVERALLCOND 7
 #define KITCHENQUAL 8
 
+<<<<<<< HEAD
 //Artan veya Azalan olarak sıralamak için hardcoded değerler
 #define ASC 0
 #define DESC 1
@@ -37,6 +38,13 @@
  * ya da kendiniz yeni bir yapi 
  * kodlayabilirsiniz.  
  */
+=======
+//Sorting için sabit değerler
+#define ASC 0
+#define DESC 1
+
+//Ev yapısı
+>>>>>>> Main fonksyonlarinda kucuk gorsel degisiklikler
 
 typedef struct house{
   int id;
@@ -60,7 +68,11 @@ House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data);
+<<<<<<< HEAD
 void sort_houses(House** houses, int criter_name, int order);
+=======
+House* sort_houses(House** houses, int criter_name);
+>>>>>>> Main fonksyonlarinda kucuk gorsel degisiklikler
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
