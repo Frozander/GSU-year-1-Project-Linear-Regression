@@ -305,7 +305,7 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
   char tmp_c_old[15];
 
   FILE * fp = fopen("mean_sale_prices_results.txt", "w");
-  sort_houses(&houses_head, criter_name);
+  sort_houses(&houses_head, criter_name, ASC);
 
   switch (criter_name)
     {
@@ -414,8 +414,8 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
   }
 }
 
-void sort_houses(House** houses, int criter_name){
-  merge_sort(houses, criter_name);
+void sort_houses(House** houses, int criter_name, int order){
+  merge_sort(houses, criter_name, order);
 }
 
 
@@ -479,7 +479,7 @@ char * convert_kitchenqual_back (int value) {
   }
 }
 
-House* merge(House* in1, House* in2, int criter_name){
+House* merge(House* in1, House* in2, int criter_name, int order){
   House* res = NULL;
 
   if (in1 == NULL) 
@@ -490,162 +490,318 @@ House* merge(House* in1, House* in2, int criter_name){
   switch (criter_name)
   {
   case ID:
-
-    if (in1->id <= in2->id)
+    
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, ID);
-    } else
+      if (in1->id <= in2->id)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+        }
+        return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, ID);
-    }
+      if (in1->id >= in2->id)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+        }
     return (res);
+    }
 
     break;
   
   case LOTAREA:
-    
-    if (in1->lotarea <= in2->lotarea)
+       
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, LOTAREA);
-    } else
+      if (in1->lotarea <= in2->lotarea)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, LOTAREA, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, LOTAREA, order);
+        }
+        return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, LOTAREA);
-    }
+      if (in1->lotarea >= in2->lotarea)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, LOTAREA, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, LOTAREA, order);
+        }
     return (res);
+    }
     
     break;
   
   case STREET:
     //String comparison
-    
-    
-
-    if (strcmp(in1->street, in2->street) <= 0)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, STREET);
-    } else
+      if (strcmp(in1->street, in2->street) <= 0)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, STREET, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, STREET, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, STREET);
+      if (strcmp(in1->street, in2->street) >= 0)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, STREET, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, STREET, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
+    
     
     break;
 
   case SALEPRICE:
-    
-    if (in1->saleprice <= in2->saleprice)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE);
-    } else
+      if (in1->saleprice <= in2->saleprice)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE);
+      if (in1->saleprice >= in2->saleprice)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
 
   case NEIGHBORHOOD:
     //String comparison
-    if (strcmp(in1->neighborhood, in2->neighborhood) <= 0)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD);
-    } else
+      if (strcmp(in1->neighborhood, in2->neighborhood) <= 0)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD);
+      if (strcmp(in1->neighborhood, in2->neighborhood) >= 0)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
   
   case YEARBUILT:
-    
-    if (in1->yearbuilt <= in2->yearbuilt)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT);
-    } else
+      if (in1->yearbuilt <= in2->yearbuilt)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT);
+      if (in1->yearbuilt >= in2->yearbuilt)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
   
   case OVERALLQUAL:
-    
-    if (in1->overallqual <= in2->overallqual)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL);
-    } else
+      if (in1->overallqual <= in2->overallqual)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL);
+        if (in1->overallqual >= in2->overallqual)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
 
   case OVERALLCOND:
-    
-    if (in1->overallcond <= in2->overallcond)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND);
-    } else
+      if (in1->overallcond <= in2->overallcond)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND, order);
+      }
+      return (res);
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND);
+      if (in1->overallcond >= in2->overallcond)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
 
   case KITCHENQUAL:
-    
-    if (in1->kitchenqual <= in2->kitchenqual)
+    if (order == ASC)
     {
-      res = in1;
-      res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL);
-    } else
+      if (in1->kitchenqual <= in2->kitchenqual)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL, order);
+      }
+      return (res);      
+    } else if (order == DESC)
     {
-      res = in2;
-      res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL);
+      if (in1->kitchenqual >= in2->kitchenqual)
+      {
+        res = in1;
+        res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL, order);
+      } else
+      {
+        res = in2;
+        res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL, order);
+      }
+      return (res);
     }
-    return (res);
+    
+    
     
     break;
 
   default:
     //yanlış girdi girildiyse id'ye göre sıralar
-    if (in1->id <= in2->id)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, ID);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, ID);
-      }
-      return (res);
-
+    if (order == ASC)
+    {
+      if (in1->id <= in2->id)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+        }
+        return (res);
+    } else if (order == DESC)
+    {
+      if (in1->id >= in2->id)
+        {
+          res = in1;
+          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+        } else
+        {
+          res = in2;
+          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+        }
+    return (res);
+    }
     break;
   }
     
 }
 
-void merge_sort(House ** list_head_ref, int criter_name){
+void merge_sort(House ** list_head_ref, int criter_name, int order){
 
   House* head = *list_head_ref;
   House* first_node;
@@ -662,73 +818,73 @@ void merge_sort(House ** list_head_ref, int criter_name){
   switch (criter_name)
   {
   case ID: //ID
-    merge_sort(&first_node, ID); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, ID);
+    merge_sort(&first_node, ID, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, ID, order);
 
-    *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, ID, order); //Recursion bittikten sonra listeler birleştirilir
     break;
   
   case LOTAREA:
-    merge_sort(&first_node, LOTAREA); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, LOTAREA);
+    merge_sort(&first_node, LOTAREA, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, LOTAREA, order);
 
-    *list_head_ref = merge(first_node, second_node, LOTAREA); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, LOTAREA, order); //Recursion bittikten sonra listeler birleştirilir
     break;
   
   case STREET:
-    merge_sort(&first_node, STREET); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, STREET);
+    merge_sort(&first_node, STREET, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, STREET, order);
 
-    *list_head_ref = merge(first_node, second_node, STREET); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, STREET, order); //Recursion bittikten sonra listeler birleştirilir
     break;
 
   case SALEPRICE:
-    merge_sort(&first_node, SALEPRICE); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, SALEPRICE);
+    merge_sort(&first_node, SALEPRICE, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, SALEPRICE, order);
 
-    *list_head_ref = merge(first_node, second_node, SALEPRICE); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, SALEPRICE, order); //Recursion bittikten sonra listeler birleştirilir
     break;
 
   case NEIGHBORHOOD:
-    merge_sort(&first_node, NEIGHBORHOOD); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, NEIGHBORHOOD);
+    merge_sort(&first_node, NEIGHBORHOOD, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, NEIGHBORHOOD, order);
 
-    *list_head_ref = merge(first_node, second_node, NEIGHBORHOOD); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, NEIGHBORHOOD, order); //Recursion bittikten sonra listeler birleştirilir
     break;
   
   case YEARBUILT:
-    merge_sort(&first_node, YEARBUILT); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, YEARBUILT);
+    merge_sort(&first_node, YEARBUILT, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, YEARBUILT, order);
 
-    *list_head_ref = merge(first_node, second_node, YEARBUILT); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, YEARBUILT, order); //Recursion bittikten sonra listeler birleştirilir
     break;
   
   case OVERALLQUAL:
-    merge_sort(&first_node, OVERALLQUAL); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, OVERALLQUAL);
+    merge_sort(&first_node, OVERALLQUAL, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, OVERALLQUAL, order);
 
-    *list_head_ref = merge(first_node, second_node, OVERALLQUAL); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, OVERALLQUAL, order); //Recursion bittikten sonra listeler birleştirilir
     break;
 
   case OVERALLCOND:
-    merge_sort(&first_node, OVERALLCOND); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, OVERALLCOND);
+    merge_sort(&first_node, OVERALLCOND, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, OVERALLCOND, order);
 
-    *list_head_ref = merge(first_node, second_node, OVERALLCOND); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, OVERALLCOND, order); //Recursion bittikten sonra listeler birleştirilir
     break;
 
   case KITCHENQUAL:
-    merge_sort(&first_node, KITCHENQUAL); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, KITCHENQUAL);
+    merge_sort(&first_node, KITCHENQUAL, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, KITCHENQUAL, order);
 
-    *list_head_ref = merge(first_node, second_node, KITCHENQUAL); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, KITCHENQUAL, order); //Recursion bittikten sonra listeler birleştirilir
     break;
 
   default: //Eğer hiçbir değer girilmez ise ID ile sorting yapılır
-    merge_sort(&first_node, ID); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, ID);
+    merge_sort(&first_node, ID, order); //Her iki node için de recursive merge_sort çağırılır.
+    merge_sort(&second_node, ID, order);
 
-    *list_head_ref = merge(first_node, second_node, ID); //Recursion bittikten sonra listeler birleştirilir
+    *list_head_ref = merge(first_node, second_node, ID, order); //Recursion bittikten sonra listeler birleştirilir
     break;
   }
   

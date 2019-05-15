@@ -27,6 +27,10 @@
 #define OVERALLCOND 7
 #define KITCHENQUAL 8
 
+//Artan veya Azalan olarak sıralamak için hardcoded değerler
+#define ASC 0
+#define DESC 1
+
 /*
  * Ornek ev veri yapisi
  * Bu veri yapisini kullanabilir
@@ -56,13 +60,13 @@ House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data);
-void sort_houses(House** houses, int criter_name);
+void sort_houses(House** houses, int criter_name, int order);
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
-void merge_sort(House ** list, int criter_name);
+void merge_sort(House ** list, int criter_name, int order);
 void split_list(House* input, House** first_half, House** second_half);
-House* merge(House* in1, House* in2, int criter_name);
+House* merge(House* in1, House* in2, int criter_name, int order);
 House** pull_from_table_by_id_as_headref(int id, House* house_list[]);
 void print_list(House* list_input);
 

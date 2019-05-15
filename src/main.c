@@ -86,7 +86,7 @@ int main(int argc,char * argv[]){
       printf("Ev sayisi girin: ");
       scanf("%d", &limit);
       House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
-      sort_houses(&head, SALEPRICE);
+      sort_houses(&head, SALEPRICE, DESC);
       print_house(head, MULTI, limit);
     }
     else if (cevap==6){
@@ -112,7 +112,7 @@ int main(int argc,char * argv[]){
 
       if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c==YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
         House * tmp_head = linearise_hash_table(housesById, HASH_TYPE_ID);
-        sort_houses(&tmp_head, c);
+        sort_houses(&tmp_head, c, ASC);
         print_house(tmp_head, MULTI, LIMITLESS);
       } else {
         printf("Hatali giris");
