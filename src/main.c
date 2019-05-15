@@ -73,7 +73,7 @@ int main(int argc,char * argv[]){
           printf("Aralik degeri girin: ");
           scanf("%d", &c_data);
         } 
-        House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        House * head = linearise_hash_table(housesById, ID);
         mean_sale_prices(head, c, c_data);
       }else {
         printf("Hatali bir deger girdiniz\n");
@@ -85,7 +85,7 @@ int main(int argc,char * argv[]){
       int limit = 0;
       printf("Ev sayisi girin: ");
       scanf("%d", &limit);
-      House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+      House * head = linearise_hash_table(housesById, ID);
       sort_houses(&head, SALEPRICE, DESC);
       print_house(head, MULTI, limit);
     }
@@ -98,9 +98,9 @@ int main(int argc,char * argv[]){
     }
     else if(cevap==8){
       printf("ID Icin Hash Tablosu\n");
-      create_hash_table_tree(housesById, HASH_TYPE_ID);
+      create_hash_table_tree(housesById, ID);
       printf("NEIGHBORORHOODS Icin Hash Tablosu\n");
-      create_hash_table_tree(housesByNeighbor, HASH_TYPE_NEIGHBORHOODS);
+      create_hash_table_tree(housesByNeighbor, NEIGHBORHOOD);
     }
     else if (cevap == 9) {
       printf("Sirali olarak evleri bastir\n");
@@ -111,7 +111,7 @@ int main(int argc,char * argv[]){
       scanf("%d", &c);
 
       if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c==YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
-        House * tmp_head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        House * tmp_head = linearise_hash_table(housesById, ID);
         sort_houses(&tmp_head, c, ASC);
         print_house(tmp_head, MULTI, LIMITLESS);
       } else {
