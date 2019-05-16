@@ -18,7 +18,7 @@ int hash_code_n(char * n) {
 }
 
 //Aldığı csv dosyası satırındaki evi çözümleyip, ev için oluşturduğu alana bilgileri yazan ve alanın pointerını döndüren fonksyon
-House * write_house(char * c) {
+House * write_house(char * c, int file_type) {
   House * tmp_house = (House*) malloc(sizeof(House));
 
   const char s[2] = ",";
@@ -32,7 +32,11 @@ House * write_house(char * c) {
       if (i==0) tmp_house->id = atoi(token);
       if (i==1) tmp_house->lotarea = atoi(token);
       if (i==2) strncpy(tmp_house->street, token, sizeof(tmp_house->street));
-      if (i==3) tmp_house->saleprice = atoi(token);
+      if (i==3) {
+        if (file_type == TRAIN) tmp_house->saleprice = atoi(token);
+        else if (file_type == TEST) i = 4;
+      }
+      
       if (i==4) strncpy(tmp_house->neighborhood, token, sizeof(tmp_house->neighborhood));
       if (i==5) tmp_house->yearbuilt = atoi(token);
       if (i==6) tmp_house->overallqual = atoi(token);
@@ -94,19 +98,19 @@ void place_house (House * house, House * houses[], int hash_type) {
 
 
 //Csv dosyalarındaki evlerin verisini okuma fonksyonu
-void read_house_data(char* filename, House * hById[], House * hByN[]){
+void read_house_data(char* filename, House * hById[], House * hByN[], int file_type){
   char buffer[LINE_BUFFER_SIZE];
   House * tmp;
   
   FILE *fp = fopen( filename, "r"); //dosyayı okumak için açıyoruz
 
-  if (!(strcmp(filename, "../data/data_train.csv"))) { //train açılmış demektir
+  if (file_type == TRAIN || file_type == TEST) { //train açılmış demektir
 
     fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
 
     while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
       fgets(buffer, LINE_BUFFER_SIZE, fp); 
-      tmp = write_house(buffer);
+      tmp = write_house(buffer, file_type);
       place_house(tmp, hById, ID);
       place_house(tmp, hByN, NEIGHBORHOOD);
     }
@@ -119,8 +123,8 @@ void read_house_data(char* filename, House * hById[], House * hByN[]){
         string ayıklama yaparak işledim. Bu şekilde daha çok kontrol olanağı oluyor ve hatalardan kaçınıyoruz.
      */
 
-  } else if (!(strcmp(filename, "../data/data_test.csv"))) { //test açılmış demektir
-
+  } else {
+    printf ("dosya tipi hatasi");
   }
   
   fclose(fp);

@@ -9,12 +9,18 @@ char * csv_train_data_directory = "../data/data_train.csv";
 House* housesById[HASH_TABLE_SIZE];
 House* housesByNeighbor[HASH_TABLE_SIZE];
 
+House* housesById_test[HASH_TABLE_SIZE];
+House* housesByNeighbor_test[HASH_TABLE_SIZE];
+
 int main(int argc,char * argv[]){
 
-  //csv_train_data_directory = argv[1];
+  if(argv[1] != NULL) {
+    csv_train_data_directory = argv[1];
+  }
 
-  read_house_data(csv_train_data_directory, housesById, housesByNeighbor);
-
+  read_house_data(csv_train_data_directory, housesById, housesByNeighbor, TRAIN);
+  read_house_data(csv_test_data_directory, housesById_test, housesByNeighbor_test, TEST);
+  
   int cevap = 1;
   while(cevap!=0){
     printf("\nEmlak Programina Hosgeldiniz!\n");

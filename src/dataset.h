@@ -30,6 +30,10 @@
 //limit_list için hardcode değerler
 #define NON -1
 
+//file types
+#define TEST 1
+#define TRAIN 0
+
 /*
  * Ornek ev veri yapisi
  * Bu veri yapisini kullanabilir
@@ -53,7 +57,6 @@ typedef struct house{
 } House;
 
 House * linearise_hash_table (House * ht[], int hash_type);
-void read_house_data(char* filename, House * hById[], House * hByN[]);
 void create_hash_table(House * house_list_head, House * houses[], int hash_type);
 House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
@@ -71,5 +74,6 @@ void print_list(House* list_input);
 char * ghc_s (House * house, int criter_name);
 int ghc_i (House * house, int criter_name);
 House* limit_list(House* houses_head, int criter_name, int min, int max);
+void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
 
 #endif
