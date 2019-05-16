@@ -45,46 +45,102 @@ Matrix* create_matrix(int line, int collumn){
   return new_matrix;
 }
 
-void create_data_matrices(House* houses,int** X,int* y){
+void create_data_matrices(House* houses,Matrix* X,Matrix* Y){
   printf("Create data matrices from dataset\n");
-  // TODO
+  House* tmp = houses;
+  Matrix* X_tmp = create_matrix(1360, 2);
+  Matrix* Y_tmp = create_matrix(1360, 1);
+
+  // Self Note: Get the size of linked list
+  //            create matrices
+  //            Iterate through the linked list
+  //            Write lotarea and price to respective matrices
+  int k = 0;
+  
+  while (tmp != NULL)
+  {
+    X_tmp->values[k][0] = 1;
+    X_tmp->values[k][1] = tmp->saleprice;
+    
+    Y_tmp->values[k][0] = tmp->lotarea; 
+    
+    tmp = tmp->nextHouse;
+
+    k++;
+  }
+
+  X = X_tmp;
+  Y = Y_tmp;  
+  
   return;
 }
 
-int** get_transpose(int** A){
-  int ** Atranspose; 
+Matrix* get_transpose(Matrix* A){
+  Matrix* Atranspose;
   printf("Get Transpose\n");
-  // TODO
+  Atranspose = create_matrix(A->collmuns, A->lines);
+  for (size_t i = 0; i < A->collmuns; i++)
+  {
+    for (size_t j = 0; j < A->lines; j++)
+    {
+      Atranspose->values[i][j] = A->values[j][i];
+    }
+  }
   return Atranspose;
 }
 
 
-int** get_inverse(int** A){
-  int** Ainverse;
+Matrix* get_inverse(Matrix* A){
+  Matrix* Ainverse;
   printf("Get inverse\n");
-  // TODO
   /*  Frozander
     Inverse matrix sadece 2x2 fonksiyonlarda olduğu için
     onlara özel bir yöntem kullanılacak
     */
+  Ainverse = create_matrix(2, 2);
+  // Calculate teh determinant of the function
+  double det = A->values[0][0] * A->values[1][1] - A->values[1][0] * A->values[0][1];
+  Ainverse->values[0][0] =  A->values[1][1] / det;
+  Ainverse->values[1][0] = -A->values[1][0] / det;
+  Ainverse->values[0][1] = -A->values[0][1] / det;
+  Ainverse->values[1][1] =  A->values[0][0] / det;
+
   return Ainverse;
 }
 
 
-int** get_multiplication(int** A, int** B){
-  int ** C;
+Matrix* get_multiplication(Matrix* A, Matrix* B){
+  Matrix* C;
   printf("Multiplication\n");
-  // TODO
+  C = create_matrix(A->lines, B->collmuns);
+  for (size_t i = 0; i < B->collmuns; i++)
+  {
+    for (size_t j = 0; j < A->lines; j++)
+    {
+      C->values[i][j] = 0;
+      for (size_t k = 0; k < A->lines; k++)
+      {
+        C->values[i][j] += A->values[k][i] * B->values[j][k];
+      }
+    }
+  }
+  
   return C;
 }
 
 
-int** calculate_parameter(House* houses){
-  int** W;
+Matrix* calculate_parameter(House* houses, Matrix* X, Matrix* Y){
+  Matrix* W;
   printf("Calculate parameters for dataset\n");
-  // TODO
+  create_data_matrices(houses, X, Y);
+  Matrix* X_transpose = get_transpose(X);
+  Matrix* tmp_matrix = get_multiplication(X_transpose, X);
+  Matrix* tmp_matrix_2 = get_multiplication(X_transpose, Y);
+  W = get_multiplication(tmp_matrix, tmp_matrix_2);
+  free(X_transpose);
+  free(tmp_matrix);
+  free(tmp_matrix_2);
   return W;
-
 }
 
 int** make_prediction(char* filename,int** W){
