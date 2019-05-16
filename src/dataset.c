@@ -186,7 +186,6 @@ void create_hash_table_tree(House * houses[], int hash_type) {
   }
 }
 
-
 //Aldığı evi ekrana yazdıran fonksyon
 void print_house(House * house, int style, int limit){
 
@@ -297,26 +296,48 @@ House* get_neighborhoods(House * house, House * houses[]){
 }
 
 //İstenilen alt üst değere göre verilen bağlı listeyi kırpar 
-House* limit_list(House* houses_head, int criter_name, int min, int max){
+void limit_houses(House** houses_head, int * criters, int criter_name, int min, int max){
   
-  House * tmp_h = houses_head;
-  
-  if(max != NON) {
-    sort_houses(&houses_head, criter_name, DESC);
-    while (ghc_i(tmp_h, criter_name) > max) {
-      tmp_h = tmp_h->nextHouse;
+  House * tmp_h = *houses_head;
+
+  if(criters[0] == NON) {
+    if(max != NON) {
+      sort_houses(&houses_head, criter_name, DESC);
+      while (ghc_i(tmp_h, criter_name) > max) {
+        tmp_h = tmp_h->nextHouse;
+      }
+      tmp_h->nextHouse = NULL;
     }
-    tmp_h->nextHouse = NULL;
+
+    sort_houses(&houses_head, criter_name, ASC);
+    if(min != NON) {
+      while (ghc_i(tmp_h, criter_name) < min) {
+        tmp_h = tmp_h->nextHouse;
+      }
+    }
   }
 
-  sort_houses(&houses_head, criter_name, ASC);
-  if(min != NON) {
-    while (ghc_i(tmp_h, criter_name) < min) {
-      tmp_h = tmp_h->nextHouse;
-    }
-  }
   
-  return tmp_h;
+  
+  houses_head = &tmp_h;
+}
+
+int get_criters_avg(House* head, int * criters) {
+  int c_s = sizof(criters);
+  int i = 0;
+  int little_sum = 0;
+  int sum = 0;
+  int counter = 0;
+  while (head->nextHouse != NULL) {
+    for(i = 0; i < c_s; i++) {
+      little_sum += ghc_i(head, criters[i]);
+    }
+    sum += little_sum;
+    little_sum = 0;
+    head = head->nextHouse;
+    counter++;
+  }
+  return sum/counter;
 }
 
 //integer değerinde ev verisi döndürür
@@ -499,9 +520,15 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
 }
 
 //link list olarak alınan evleri sıralayan fonksyon
-House* sort_houses(House** houses, int criter_name, int order){
+void sort_houses(House** houses, int criter_name, int order){
   merge_sort(houses, criter_name, order);
   return *houses;
+}
+
+//link list olarak alınan evleri sıralayan fonksyon
+House* sort_houses_2(House* houses, int criter_name, int order){
+  merge_sort(&houses, criter_name, order);
+  return houses;
 }
 
 //ikili karakter cinsinden alınan kitchenqual verisini 5-1 arası sayıya dönüştürür
@@ -562,6 +589,20 @@ char * convert_kitchenqual_back (int value) {
     return 0;
     break;
   }
+}
+
+int model_by_similarity(House * houses [], House  * house) {
+  House * head;
+  int avg;
+  int * criters = {OVERALLCOND, OVERALLQUAL, KITCHENQUAL};
+
+  head = get_neighborhoods(house, houses);
+  sort_houses(&head, LOTAREA, ASC);
+  head = limit_list(head, LOTAREA, (house->lotarea - 1000), (house->lotarea + 1000));
+  sort_houses(&head, YEARBUILT, ASC);
+  head = limit_list(head, YEARBUILT, (house->yearbuilt - 5), (house->yearbuilt + 5));
+  avg = get_criters_avg(head, criters);
+  head = limit_list(head, )
 }
 
 //EV SIRALAMA FONKSYONLARI (MERGE SORT)
