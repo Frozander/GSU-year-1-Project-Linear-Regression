@@ -59,7 +59,7 @@ void print_matrix(Matrix* matrix_in){
   {
     for (size_t j = 0; j < matrix_in->collmuns; j++)
     {
-      printf("%lf ", matrix_in->values[i][j]);
+      printf("%.2lf ", matrix_in->values[i][j]);
     }
     printf("\n");
   }
@@ -99,11 +99,11 @@ void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
 Matrix* get_transpose(Matrix* A){
   Matrix* Atranspose;
   Atranspose = create_matrix(A->collmuns, A->lines);
-  for (size_t i = 0; i < A->collmuns; i++)
+  for (size_t i = 0; i < A->lines; i++)
   {
-    for (size_t j = 0; j < A->lines; j++)
+    for (size_t j = 0; j < A->collmuns; j++)
     {
-      Atranspose->values[i][j] = A->values[j][i];
+      Atranspose->values[j][i] = A->values[i][j];
     }
   }
   return Atranspose;
@@ -120,8 +120,8 @@ Matrix* get_inverse(Matrix* A){
   // Calculate teh determinant of the function
   double det = A->values[0][0] * A->values[1][1] - A->values[1][0] * A->values[0][1];
   Ainverse->values[0][0] =  A->values[1][1] / det;
-  Ainverse->values[1][0] = -A->values[1][0] / det;
-  Ainverse->values[0][1] = -A->values[0][1] / det;
+  Ainverse->values[1][0] = -1 * A->values[1][0] / det;
+  Ainverse->values[0][1] = -1 *A->values[0][1] / det;
   Ainverse->values[1][1] =  A->values[0][0] / det;
   return Ainverse;
 }
@@ -130,14 +130,14 @@ Matrix* get_multiplication(Matrix* A, Matrix* B){
   Matrix* C;
   printf("Multiplication\n");
   C = create_matrix(A->lines, B->collmuns);
-  for (size_t i = 0; i < B->collmuns; i++)
+  for (size_t i = 0; i < C->lines; i++)
   {
-    for (size_t j = 0; j < A->lines; j++)
+    for (size_t j = 0; j < C->collmuns; j++)
     {
       C->values[i][j] = 0;
-      for (size_t k = 0; k < A->lines; k++)
+      for (size_t k = 0; k < A->collmuns; k++)
       {
-        C->values[i][j] += A->values[k][i] * B->values[j][k];
+        C->values[i][j] += A->values[i][k] * B->values[k][j];
       }
     }
   }
@@ -152,8 +152,8 @@ Matrix* calculate_parameter(House* houses){
   create_data_matrices(&houses, &X, &Y);
   Matrix* X_transpose = get_transpose(X);
   Matrix* tmp_matrix = get_multiplication(X_transpose, X);
-  Matrix* tmp_matrix_inv = get_inverse(tmp_matrix);
   Matrix* tmp_matrix_2 = get_multiplication(X_transpose, Y);
+  Matrix* tmp_matrix_inv = get_inverse(tmp_matrix);
   W = get_multiplication(tmp_matrix_inv, tmp_matrix_2);
   free_matrix(X_transpose);
   free_matrix(tmp_matrix);
