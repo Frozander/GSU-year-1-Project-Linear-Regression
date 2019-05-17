@@ -33,7 +33,7 @@ Matrix* create_matrix(int line, int collumn){
   // Verilerin tutulduğu values double** iki boyutlu arrayinin 1. boyutu oluşturulur (satır)
   new_matrix->values = malloc(sizeof(double*) * line);
   //For düngüsü ile 1. boyuttaki tüm değerler için sütunlar oluşturulur
-  for (size_t i = 0; i < new_matrix->collmuns; i++)
+  for (size_t i = 0; i < collumn; i++)
   {
     new_matrix->values[i] = malloc(sizeof(double) * collumn);
     //ikinci bir for döngüsü ile arraydeki tüm veriler sıfırlanır
@@ -45,11 +45,46 @@ Matrix* create_matrix(int line, int collumn){
   return new_matrix;
 }
 
+void free_matrix(Matrix* matrix_in){
+
+  for (size_t i = 0; i < matrix_in->lines; i++)
+  {
+    free(matrix_in->values[i]);
+  }
+  free(matrix_in->values);
+  free(matrix_in);
+  
+}
+
+void print_matrix(Matrix* matrix_in){
+  
+  printf("Printing Matrix\n");
+  for (size_t i = 0; i < matrix_in->lines; i++)
+  {
+    for (size_t j = 0; j < matrix_in->collmuns; j++)
+    {
+      printf("%lf ", matrix_in->values[i][j]);
+    }
+    printf("\n");
+    
+  }
+  
+}
+
 void create_data_matrices(House* houses,Matrix* X,Matrix* Y){
   printf("Create data matrices from dataset\n");
   House* tmp = houses;
-  Matrix* X_tmp = create_matrix(1360, 2);
-  Matrix* Y_tmp = create_matrix(1360, 1);
+  House* curs = houses;
+  int counter = 0;
+
+  while (curs != NULL)
+  {
+    counter++;
+    curs = curs->nextHouse;
+  }
+  
+  Matrix* X_tmp = create_matrix(counter, 2);
+  Matrix* Y_tmp = create_matrix(counter, 1);
 
   // Self Note: Get the size of linked list
   //            create matrices
@@ -59,13 +94,12 @@ void create_data_matrices(House* houses,Matrix* X,Matrix* Y){
   
   while (tmp != NULL)
   {
-    X_tmp->values[k][0] = 1;
-    X_tmp->values[k][1] = tmp->saleprice;
+    X_tmp->values[0][k] = 1;
+    X_tmp->values[1][k] = tmp->lotarea;
     
-    Y_tmp->values[k][0] = tmp->lotarea; 
+    Y_tmp->values[0][k] = tmp->lotarea; 
     
     tmp = tmp->nextHouse;
-
     k++;
   }
 
@@ -129,22 +163,26 @@ Matrix* get_multiplication(Matrix* A, Matrix* B){
 }
 
 
-Matrix* calculate_parameter(House* houses, Matrix* X, Matrix* Y){
+Matrix* calculate_parameter(House* houses){
   Matrix* W;
+  Matrix* X;
+  Matrix* Y;
   printf("Calculate parameters for dataset\n");
   create_data_matrices(houses, X, Y);
   Matrix* X_transpose = get_transpose(X);
   Matrix* tmp_matrix = get_multiplication(X_transpose, X);
   Matrix* tmp_matrix_2 = get_multiplication(X_transpose, Y);
   W = get_multiplication(tmp_matrix, tmp_matrix_2);
-  free(X_transpose);
-  free(tmp_matrix);
-  free(tmp_matrix_2);
+  free_matrix(X_transpose);
+  free_matrix(tmp_matrix);
+  free_matrix(tmp_matrix_2);
+  free_matrix(X);
+  free_matrix(Y);
   return W;
 }
 
-int** make_prediction(char* filename,int** W){
-  int** predicted_prices;
+Matrix* make_prediction(char* filename,Matrix* W){
+  Matrix* predicted_prices;
   printf("Make prediction\n");
   // TODO
   // 1 - filename olarak verilen test verisini oku,
@@ -154,8 +192,27 @@ int** make_prediction(char* filename,int** W){
   //  fiyat tahmini yap, burda yapilmasi gereken
   //  X ve W matrislerinin carpimini bulmak
   // 4 - Sonuclari bir dosyaya yaz
+  House* house_id[100];
+  House* house_neighbor[100];
+  read_house_data(filename, house_id, house_neighbor);
+  House* linear_houses = linearise_hash_table(house_id, HASH_TYPE_ID);
 
+  House* tmp = linear_houses;
+  Matrix* X= create_matrix(1360, 2);
+
+  int k = 0;
+  
+  while (tmp != NULL)
+  {
+    X->values[k][0] = 1;
+    X->values[k][1] = tmp->lotarea;
+    
+    tmp = tmp->nextHouse;
+
+    k++;
+  } 
+
+  predicted_prices = get_multiplication(X, W);
+  free_matrix(X);
+  return predicted_prices;
 }
-
-
-

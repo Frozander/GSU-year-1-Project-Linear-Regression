@@ -23,7 +23,9 @@ Matrix* get_transpose(Matrix* A);
 Matrix* get_inverse(Matrix* A);
 Matrix* get_multiplication(Matrix* A, Matrix* B);
 Matrix* calculate_parameter(House* houses);
-
+Matrix* make_prediction(char* filename,Matrix* W);
 Matrix* create_matrix(int line, int collumn);
+void print_matrix(Matrix* matrix_in);
+void free_matrix(Matrix* matrix_in);
 
 #endif

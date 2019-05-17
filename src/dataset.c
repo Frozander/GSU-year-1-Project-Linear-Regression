@@ -120,7 +120,14 @@ void read_house_data(char* filename, House * hById[], House * hByN[]){
      */
 
   } else if (!(strcmp(filename, "../data/data_test.csv"))) { //test açılmış demektir
+    fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
 
+    while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
+      fgets(buffer, LINE_BUFFER_SIZE, fp); 
+      tmp = write_house(buffer);
+      place_house(tmp, hById, HASH_TYPE_ID);
+      place_house(tmp, hByN, HASH_TYPE_NEIGHBORHOODS);
+    }
   }
   
   fclose(fp);

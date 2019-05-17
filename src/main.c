@@ -95,6 +95,31 @@ int main(int argc,char * argv[]){
     }
     else if(cevap==7){
       printf("Fiyat tahmini yap\n");
+      int input = 0;
+      printf("Yöntem(matrix: 0|ortalama: 1): ");
+      scanf("%d", &input);
+      House* head = linearise_hash_table(housesById, HASH_TYPE_ID);
+
+      if (input == 0)
+      {
+        Matrix* W;
+        W = calculate_parameter(head);
+        Matrix* prediction = make_prediction(csv_test_data_directory, W);
+        print_matrix(prediction);
+        
+      } else if (input == 1)
+      {
+        /* code */
+      } else
+      {
+        printf("Hatali giris!\n");
+      }
+      
+      
+      
+      
+
+      
     }
     else if(cevap==8){
       printf("ID Icin Hash Tablosu\n");
