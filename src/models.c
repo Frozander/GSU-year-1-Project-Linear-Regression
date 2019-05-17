@@ -2,9 +2,28 @@
 #include"dataset.h"
 #include<stdio.h>
 
-int model_by_similarity(House* houses,House new_house){
-  printf("Find price for house %d\n",new_house.id);
-  int price;
+
+int model_by_similarity(House * houses [], House  * house) {
+  House * head;
+  int avg;
+  int gap;
+
+  head = get_neighborhoods(house, houses);
+  printf("\nKomsular alindi\nKomsu sayisi: %d\n", get_list_lenght(head));
+
+  gap = 2000;
+  limit_houses(&head, LOTAREA, (house->lotarea - gap), (house->lotarea + gap));
+  printf("\nLotarea ya göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
+
+  gap = 5;
+  limit_houses(&head, YEARBUILT, (house->yearbuilt - gap), (house->yearbuilt + gap));
+  printf("\nYearbuilt e göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
+
+  return get_criter_avg(head, SALEPRICE);
+}
+
+
+
   //TODO
 
   // 1 - Oncelikle ayni komsuluktaki evleri bulun
@@ -20,9 +39,7 @@ int model_by_similarity(House* houses,House new_house){
   // 6 - Ek olarak kaliteye gore secim yapabilirsiniz.
   // 7 - Son elemeden sonra elinizde kalan evlerin fiyat ortalamasini alin
   // 8 - Yeni gelen ev icin fiyat degeri bu ortalama olmalidir.
-  
-  return price;
-}
+
 
 
 
@@ -77,6 +94,3 @@ int** make_prediction(char* filename,int** W){
   // 4 - Sonuclari bir dosyaya yaz
 
 }
-
-
-

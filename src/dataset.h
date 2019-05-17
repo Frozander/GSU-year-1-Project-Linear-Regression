@@ -35,6 +35,9 @@
 #define TEST 1
 #define TRAIN 0
 
+//operators
+
+
 /*
  * Ornek ev veri yapisi
  * Bu veri yapisini kullanabilir
@@ -64,7 +67,6 @@ void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data);
 void sort_houses(House** houses, int criter_name, int order);
-House* sort_houses_2(House* houses, int criter_name, int order);
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
@@ -77,6 +79,7 @@ char * ghc_s (House * house, int criter_name);
 int ghc_i (House * house, int criter_name);
 House* limit_list(House* houses_head, int criter_name, int min, int max);
 void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
-void limit_houses(House** houses_head, int * criters, int criter_name, int min, int max);
-int  model_by_similarity(House * houses[], House * house);
+void limit_houses(House** houses_head, int criter_name, int min, int max);
+int get_criter_avg(House* head, int criter);
+int get_list_lenght (House * head);
 #endif
