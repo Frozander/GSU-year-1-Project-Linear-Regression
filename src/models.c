@@ -46,17 +46,14 @@ Matrix* create_matrix(int line, int collumn){
 }
 
 void free_matrix(Matrix* matrix_in){
-
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
     free(matrix_in->values[i]);
   }
   free(matrix_in);
-  
 }
 
 void print_matrix(Matrix* matrix_in){
-  
   printf("Printing Matrix\n");
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
@@ -65,30 +62,21 @@ void print_matrix(Matrix* matrix_in){
       printf("%lf ", matrix_in->values[i][j]);
     }
     printf("\n");
-    
   }
-  
 }
 
 void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
   printf("Create data matrices from dataset\n");
   House* tmp = *houses;
   int counter = 0;
-
   House* cur = *houses;
   while (cur!=NULL)
   {
     cur= cur->nextHouse;
     counter++;
   }
-  
   Matrix* X_tmp = create_matrix(counter, 2);
   Matrix* Y_tmp = create_matrix(counter, 1);
-
-  // Self Note: Get the size of linked list
-  //            create matrices
-  //            Iterate through the linked list
-  //            Write lotarea and price to respective matrices
   int k = 0;
   while (tmp != NULL)
   {
@@ -121,7 +109,6 @@ Matrix* get_transpose(Matrix* A){
   return Atranspose;
 }
 
-
 Matrix* get_inverse(Matrix* A){
   Matrix* Ainverse;
   printf("Get inverse\n");
@@ -136,10 +123,8 @@ Matrix* get_inverse(Matrix* A){
   Ainverse->values[1][0] = -A->values[1][0] / det;
   Ainverse->values[0][1] = -A->values[0][1] / det;
   Ainverse->values[1][1] =  A->values[0][0] / det;
-
   return Ainverse;
 }
-
 
 Matrix* get_multiplication(Matrix* A, Matrix* B){
   Matrix* C;
@@ -156,10 +141,8 @@ Matrix* get_multiplication(Matrix* A, Matrix* B){
       }
     }
   }
-  
   return C;
 }
-
 
 Matrix* calculate_parameter(House* houses){
   Matrix* W;
@@ -167,8 +150,6 @@ Matrix* calculate_parameter(House* houses){
   Matrix* Y;
   printf("Calculate parameters for dataset\n");
   create_data_matrices(&houses, &X, &Y);
-  //print_matrix(X);
-  //print_matrix(Y);
   Matrix* X_transpose = get_transpose(X);
   Matrix* tmp_matrix = get_multiplication(X_transpose, X);
   Matrix* tmp_matrix_inv = get_inverse(tmp_matrix);
@@ -198,9 +179,7 @@ Matrix* make_prediction(char* filename,Matrix* W){
   House* house_neighbor[100];
   read_house_data(filename, house_id, house_neighbor);
   House* linear_houses = linearise_hash_table(house_id, HASH_TYPE_ID);
-
   House* tmp = linear_houses;
-
   int counter = 0;
   House* cur = linear_houses;
   while (cur!=NULL)
@@ -208,22 +187,15 @@ Matrix* make_prediction(char* filename,Matrix* W){
     counter++;
     cur = cur->nextHouse;
   }
-  
-
   Matrix* X= create_matrix(counter, 2);
-
   int k = 0;
-  
   while (tmp != NULL)
   {
     X->values[k][0] = 1;
     X->values[k][1] = tmp->lotarea;
-    
     tmp = tmp->nextHouse;
-
     k++;
   } 
-
   predicted_prices = get_multiplication(X, W);
   free_matrix(X);
   return predicted_prices;
