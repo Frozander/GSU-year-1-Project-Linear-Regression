@@ -18,7 +18,7 @@ int hash_code_n(char * n) {
 }
 
 //Aldığı csv dosyası satırındaki evi çözümleyip, ev için oluşturduğu alana bilgileri yazan ve alanın pointerını döndüren fonksyon
-House * write_house(char * c) {
+House * write_house(char * c, int file_type) {
   House * tmp_house = (House*) malloc(sizeof(House));
 
   const char s[2] = ",";
@@ -32,7 +32,11 @@ House * write_house(char * c) {
       if (i==0) tmp_house->id = atoi(token);
       if (i==1) tmp_house->lotarea = atoi(token);
       if (i==2) strncpy(tmp_house->street, token, sizeof(tmp_house->street));
-      if (i==3) tmp_house->saleprice = atoi(token);
+      if (i==3) {
+        if (file_type == TRAIN) tmp_house->saleprice = atoi(token);
+        else if (file_type == TEST) i = 4;
+      }
+      
       if (i==4) strncpy(tmp_house->neighborhood, token, sizeof(tmp_house->neighborhood));
       if (i==5) tmp_house->yearbuilt = atoi(token);
       if (i==6) tmp_house->overallqual = atoi(token);
@@ -54,7 +58,7 @@ void place_house (House * house, House * houses[], int hash_type) {
 
   switch (hash_type)
   {
-  case HASH_TYPE_ID:
+  case ID:
     hashIndex = hash_code(house->id);
     if(houses[hashIndex] == NULL) {
       houses[hashIndex] = house;
@@ -68,7 +72,7 @@ void place_house (House * house, House * houses[], int hash_type) {
     }
     break;
 
-  case HASH_TYPE_NEIGHBORHOODS:
+  case NEIGHBORHOOD:
     hashIndex = hash_code_n(house->neighborhood);
     int c = 0;
     while (houses[hashIndex] != NULL && strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
@@ -94,21 +98,21 @@ void place_house (House * house, House * houses[], int hash_type) {
 
 
 //Csv dosyalarındaki evlerin verisini okuma fonksyonu
-void read_house_data(char* filename, House * hById[], House * hByN[]){
+void read_house_data(char* filename, House * hById[], House * hByN[], int file_type){
   char buffer[LINE_BUFFER_SIZE];
   House * tmp;
   
   FILE *fp = fopen( filename, "r"); //dosyayı okumak için açıyoruz
 
-  if (!(strcmp(filename, "../data/data_train.csv"))) { //train açılmış demektir
+  if (file_type == TRAIN || file_type == TEST) { //train açılmış demektir
 
     fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
 
     while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
       fgets(buffer, LINE_BUFFER_SIZE, fp); 
-      tmp = write_house(buffer);
-      place_house(tmp, hById, HASH_TYPE_ID);
-      place_house(tmp, hByN, HASH_TYPE_NEIGHBORHOODS);
+      tmp = write_house(buffer, file_type);
+      place_house(tmp, hById, ID);
+      place_house(tmp, hByN, NEIGHBORHOOD);
     }
 
     /* berkay-yildiz:
@@ -119,15 +123,8 @@ void read_house_data(char* filename, House * hById[], House * hByN[]){
         string ayıklama yaparak işledim. Bu şekilde daha çok kontrol olanağı oluyor ve hatalardan kaçınıyoruz.
      */
 
-  } else if (!(strcmp(filename, "../data/data_test.csv"))) { //test açılmış demektir
-    fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
-
-    while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
-      fgets(buffer, LINE_BUFFER_SIZE, fp); 
-      tmp = write_house(buffer);
-      place_house(tmp, hById, HASH_TYPE_ID);
-      place_house(tmp, hByN, HASH_TYPE_NEIGHBORHOODS);
-    }
+  } else {
+    printf ("dosya tipi hatasi");
   }
   
   fclose(fp);
@@ -139,7 +136,7 @@ House* linearise_hash_table (House * ht[], int hash_type) {
   int counter;
   switch (hash_type)
   {
-  case HASH_TYPE_ID:
+  case ID:
     
     counter = ht[0]->id;
     tmp = get_house_byid(counter, ht);
@@ -165,7 +162,7 @@ void create_hash_table_tree(House * houses[], int hash_type) {
   burayı yapıyı kontrol etmek için yazdım.
   Daha sonrasında hash table ı başka şekillerde hashlarsak buradan nasıl bir yapı oluştuğunu kolayca görebiliriz.
   */
-  int size = (hash_type == HASH_TYPE_ID) ? HASH_TABLE_SIZE_TYPE_ID : HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+  int size = (hash_type == ID) ? HASH_TABLE_SIZE_TYPE_ID : HASH_TABLE_SIZE_TYPE_NEIGHBOR;
   for(int i = 0; i < size; i++) {
     House * tmp;
     printf("\nhash: %-3d| ", i);
@@ -173,12 +170,12 @@ void create_hash_table_tree(House * houses[], int hash_type) {
     else {
       tmp = houses[i];
       printf("%-5d", tmp->id);
-      if(hash_type == HASH_TYPE_ID) {
+      if(hash_type == ID) {
         while(tmp->nextHouseById != NULL) {
           tmp = tmp->nextHouseById;
           printf("%-5d", tmp->id);
         }
-      } else if(hash_type == HASH_TYPE_NEIGHBORHOODS) {
+      } else if(hash_type == NEIGHBORHOOD) {
         while(tmp->nextHouseByNeighbor != NULL) {
           tmp = tmp->nextHouseByNeighbor;
           printf("%-7s", tmp->neighborhood);
@@ -188,7 +185,6 @@ void create_hash_table_tree(House * houses[], int hash_type) {
     }
   }
 }
-
 
 //Aldığı evi ekrana yazdıran fonksyon
 void print_house(House * house, int style, int limit){
@@ -282,6 +278,7 @@ House* get_house_byid(int id, House * houses[]){
 
 }
 
+//Verilen evin komşularını bağlı liste olarak döndüren fonksyon
 House* get_neighborhoods(House * house, House * houses[]){
   int hashIndex = hash_code_n(house->neighborhood);
   while (strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
@@ -296,6 +293,130 @@ House* get_neighborhoods(House * house, House * houses[]){
   tmp->nextHouse = NULL;
 
   return houses[hashIndex];
+}
+
+
+//İstenilen alt üst değere göre verilen bağlı listeyi kırpar, NON kullanılarak min veya max belirlenmeyebilir
+void limit_houses(House** houses_head, int criter_name, int min, int max){
+  
+  sort_houses(houses_head, criter_name, ASC); //İstenilen kritere göre küçükten büyüğe listeyi sıralıyoruz
+  House * tmp = *houses_head; //Listede gezmek için listenin başını bir pointera koyuyoruz
+
+  if(min != NON) { //Eğer min değeri yok denilmemişse
+    while (tmp->nextHouse != NULL) { //Liste bitene kadar gez diyoruz
+      if(ghc_i(tmp, criter_name) < min) { //Her elemanı minimumla karşılaştırıyoruz
+        tmp = tmp->nextHouse; //Eğer minimumdan küçükse sonraki elemana geçiyoruz
+      } else {
+        houses_head = &tmp; //Eğer büyük veya eşitse onu kafa olarak geri döndürüyoruz (Verilen adrese pointerın adresini yazıyoruz)
+        break; //Ve while dan çıkıyoruz
+      }
+    }
+  }
+
+  if(max != NON) { //Eğer maksimum değer yok denilmemişse
+    while (tmp->nextHouse != NULL) { //Liste bitena kadar gez diyoruz
+      if(ghc_i(tmp->nextHouse, criter_name) <= max) { //Her elemanın bir sonraki elemanını maksimumla karşılaştırıyoruz, yukarda kaldığımız yerden devam ediyoruz
+        tmp = tmp->nextHouse; //Eğer sonraki eleman maksimumdan küçük veya eşitse sonraki elemana geçiyoruz
+      } else {
+        tmp->nextHouse = NULL; //Eğer sonraki eleman maksimumdan büyükse elimizdeki elemanın sonrasını NULL yaparak onu son eleman haline getiriyoruz
+      }
+    }
+  }
+}
+
+int get_criter_avg(House* head, int criter) {
+
+  int sum = 0;
+  int counter = 0;
+  while (head->nextHouse != NULL) {
+    sum += ghc_i(head, criter);
+    head = head->nextHouse;
+    counter++;
+  }
+  if(counter != 0) {
+    return sum/counter;
+  } else {
+    printf("crtier hatasi");
+    return 0;
+  }
+  
+}
+
+int get_list_lenght (House * head) {
+  if (head != NULL) {
+    int counter = 1;
+    while(head->nextHouse != NULL) {
+      counter++;
+      head = head->nextHouse;
+    }
+    return counter;
+  }else {
+    printf("head = NULL");
+    return 0;
+  }
+  
+}
+
+int ghc_i_avg (House * house, int * criter_names) {
+  int sum = 0;
+  int counter = 0;
+  while (counter < sizeof(criter_names) ) {
+    sum += ghc_i(house, criter_names[counter]);  
+    counter++;
+  }
+
+  return sum/counter;
+}
+
+//integer değerinde ev verisi döndürür
+int ghc_i (House * house, int criter_name) {
+  switch (criter_name)
+    {
+    case ID:
+      return house->id;
+      break;
+    case LOTAREA:
+      return house->lotarea;
+      break;
+    case SALEPRICE:
+      return house->saleprice;
+      break;
+    case YEARBUILT:
+      return house->yearbuilt;
+      break;
+    case OVERALLQUAL:
+      return house->overallqual;
+      break;
+    case OVERALLCOND: 
+      return house->overallcond;
+      break;
+    case KITCHENQUAL:
+      return house->kitchenqual;
+      break;
+    case STREET:
+      return *(house->street);
+      break;
+    case NEIGHBORHOOD:
+      return *(house->neighborhood);
+      break;
+    default:
+      break;
+    }
+}
+
+//string cinsinde ev verisi döndürür
+char * ghc_s (House * house, int criter_name) {
+  switch (criter_name)
+    {
+    case STREET:
+      return house->street;
+      break;
+    case NEIGHBORHOOD:
+      return house->neighborhood;
+      break;
+    default:
+      break;
+    }
 }
 
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
@@ -318,8 +439,9 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
     {
     case LOTAREA:
       keeper = houses_head->lotarea;
-      printf("%s | %-20s | %-10s\n", "Araliktaki Ev Sayisi", "Ort Lotarea", "Ort Fiyat");
-
+      printf("\033[1;31m"); //Kırmızı bastırmak için
+      printf("\n%-25s%-25s%-25s%-25s%-25s\n", "Min Lotarea", "Max Lotarea", "Ev Sayısı", "Ortalama Lotarea", "Ortalama Fiyat");
+      printf("\033[0m"); //Standart renkte bastırmak için
       break;
     case STREET:
     
@@ -347,9 +469,13 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
     switch (criter_name)
     {
     case LOTAREA:
+    /*
+    berkay-yildiz:
+    Burada sonuçlarda anlamadığım şekilde hata var. Ortalama değerler çok anlamsız çıkıyor, neden olduğunu bulamadım.
+    */
       tmp_i = houses_head->lotarea;
       if(tmp_i - keeper > criter_data) {
-        printf("(%d - %d) %d | %-20d | %-10d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter));
+        printf("%-25d%-25d%-25d%-25d%-25d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter-1));
         price_sum = avg_sum = counter = 0;
         keeper = tmp_i;
       }
@@ -421,10 +547,10 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
   }
 }
 
+//link list olarak alınan evleri sıralayan fonksyon
 void sort_houses(House** houses, int criter_name, int order){
   merge_sort(houses, criter_name, order);
 }
-
 
 //ikili karakter cinsinden alınan kitchenqual verisini 5-1 arası sayıya dönüştürür
 int convert_kitchenqual (char * c) {
@@ -486,6 +612,7 @@ char * convert_kitchenqual_back (int value) {
   }
 }
 
+//EV SIRALAMA FONKSYONLARI (MERGE SORT)
 House* merge(House* in1, House* in2, int criter_name, int order){
   House* res = NULL;
 
@@ -494,318 +621,31 @@ House* merge(House* in1, House* in2, int criter_name, int order){
   else if (in2 == NULL) 
       return (in1);
 
-  switch (criter_name)
-  {
-  case ID:
-    
-    if (order == ASC)
+  if (order == ASC)
     {
-      if (in1->id <= in2->id)
+      if (ghc_i(in1, criter_name) <= ghc_i(in2, criter_name))
         {
           res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+          res->nextHouse = merge(in1->nextHouse, in2, criter_name, order);
         } else
         {
           res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+          res->nextHouse = merge(in1, in2->nextHouse, criter_name, order);
         }
         return (res);
     } else if (order == DESC)
     {
-      if (in1->id >= in2->id)
+      if (ghc_i(in1, criter_name) >= ghc_i(in2, criter_name))
         {
           res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
+          res->nextHouse = merge(in1->nextHouse, in2, criter_name, order);
         } else
         {
           res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
+          res->nextHouse = merge(in1, in2->nextHouse, criter_name, order);
         }
     return (res);
     }
-
-    break;
-  
-  case LOTAREA:
-       
-    if (order == ASC)
-    {
-      if (in1->lotarea <= in2->lotarea)
-        {
-          res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, LOTAREA, order);
-        } else
-        {
-          res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, LOTAREA, order);
-        }
-        return (res);
-    } else if (order == DESC)
-    {
-      if (in1->lotarea >= in2->lotarea)
-        {
-          res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, LOTAREA, order);
-        } else
-        {
-          res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, LOTAREA, order);
-        }
-    return (res);
-    }
-    
-    break;
-  
-  case STREET:
-    //String comparison
-    if (order == ASC)
-    {
-      if (strcmp(in1->street, in2->street) <= 0)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, STREET, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, STREET, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-      if (strcmp(in1->street, in2->street) >= 0)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, STREET, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, STREET, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    
-    break;
-
-  case SALEPRICE:
-    if (order == ASC)
-    {
-      if (in1->saleprice <= in2->saleprice)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-      if (in1->saleprice >= in2->saleprice)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, SALEPRICE, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, SALEPRICE, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-
-  case NEIGHBORHOOD:
-    //String comparison
-    if (order == ASC)
-    {
-      if (strcmp(in1->neighborhood, in2->neighborhood) <= 0)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-      if (strcmp(in1->neighborhood, in2->neighborhood) >= 0)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, NEIGHBORHOOD, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, NEIGHBORHOOD, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-  
-  case YEARBUILT:
-    if (order == ASC)
-    {
-      if (in1->yearbuilt <= in2->yearbuilt)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-      if (in1->yearbuilt >= in2->yearbuilt)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, YEARBUILT, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, YEARBUILT, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-  
-  case OVERALLQUAL:
-    if (order == ASC)
-    {
-      if (in1->overallqual <= in2->overallqual)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-        if (in1->overallqual >= in2->overallqual)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, OVERALLQUAL, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, OVERALLQUAL, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-
-  case OVERALLCOND:
-    if (order == ASC)
-    {
-      if (in1->overallcond <= in2->overallcond)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND, order);
-      }
-      return (res);
-    } else if (order == DESC)
-    {
-      if (in1->overallcond >= in2->overallcond)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, OVERALLCOND, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, OVERALLCOND, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-
-  case KITCHENQUAL:
-    if (order == ASC)
-    {
-      if (in1->kitchenqual <= in2->kitchenqual)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL, order);
-      }
-      return (res);      
-    } else if (order == DESC)
-    {
-      if (in1->kitchenqual >= in2->kitchenqual)
-      {
-        res = in1;
-        res->nextHouse = merge(in1->nextHouse, in2, KITCHENQUAL, order);
-      } else
-      {
-        res = in2;
-        res->nextHouse = merge(in1, in2->nextHouse, KITCHENQUAL, order);
-      }
-      return (res);
-    }
-    
-    
-    
-    break;
-
-  default:
-    //yanlış girdi girildiyse id'ye göre sıralar
-    if (order == ASC)
-    {
-      if (in1->id <= in2->id)
-        {
-          res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
-        } else
-        {
-          res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
-        }
-        return (res);
-    } else if (order == DESC)
-    {
-      if (in1->id >= in2->id)
-        {
-          res = in1;
-          res->nextHouse = merge(in1->nextHouse, in2, ID, order);
-        } else
-        {
-          res = in2;
-          res->nextHouse = merge(in1, in2->nextHouse, ID, order);
-        }
-    return (res);
-    }
-    break;
-  }
-    
 }
 
 void merge_sort(House ** list_head_ref, int criter_name, int order){
@@ -819,82 +659,16 @@ void merge_sort(House ** list_head_ref, int criter_name, int order){
     return;
   }
 
+  if(criter_name < ID || criter_name > KITCHENQUAL) criter_name = ID;
+
   //Listeyi ortadan ikiye bölüp first_node ve second_node pointerlarına atar
   split_list(head, &first_node, &second_node);
   
-  switch (criter_name)
-  {
-  case ID: //ID
-    merge_sort(&first_node, ID, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, ID, order);
+  merge_sort(&first_node, criter_name, order); //Her iki node için de recursive merge_sort çağırılır.
+  merge_sort(&second_node, criter_name, order);
 
-    *list_head_ref = merge(first_node, second_node, ID, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-  
-  case LOTAREA:
-    merge_sort(&first_node, LOTAREA, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, LOTAREA, order);
+  *list_head_ref = merge(first_node, second_node, criter_name, order); //Recursion bittikten sonra listeler birleştirilir
 
-    *list_head_ref = merge(first_node, second_node, LOTAREA, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-  
-  case STREET:
-    merge_sort(&first_node, STREET, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, STREET, order);
-
-    *list_head_ref = merge(first_node, second_node, STREET, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-
-  case SALEPRICE:
-    merge_sort(&first_node, SALEPRICE, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, SALEPRICE, order);
-
-    *list_head_ref = merge(first_node, second_node, SALEPRICE, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-
-  case NEIGHBORHOOD:
-    merge_sort(&first_node, NEIGHBORHOOD, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, NEIGHBORHOOD, order);
-
-    *list_head_ref = merge(first_node, second_node, NEIGHBORHOOD, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-  
-  case YEARBUILT:
-    merge_sort(&first_node, YEARBUILT, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, YEARBUILT, order);
-
-    *list_head_ref = merge(first_node, second_node, YEARBUILT, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-  
-  case OVERALLQUAL:
-    merge_sort(&first_node, OVERALLQUAL, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, OVERALLQUAL, order);
-
-    *list_head_ref = merge(first_node, second_node, OVERALLQUAL, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-
-  case OVERALLCOND:
-    merge_sort(&first_node, OVERALLCOND, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, OVERALLCOND, order);
-
-    *list_head_ref = merge(first_node, second_node, OVERALLCOND, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-
-  case KITCHENQUAL:
-    merge_sort(&first_node, KITCHENQUAL, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, KITCHENQUAL, order);
-
-    *list_head_ref = merge(first_node, second_node, KITCHENQUAL, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-
-  default: //Eğer hiçbir değer girilmez ise ID ile sorting yapılır
-    merge_sort(&first_node, ID, order); //Her iki node için de recursive merge_sort çağırılır.
-    merge_sort(&second_node, ID, order);
-
-    *list_head_ref = merge(first_node, second_node, ID, order); //Recursion bittikten sonra listeler birleştirilir
-    break;
-  }
-  
 }
 
 void split_list(House* input, House** first_half, House** second_half){

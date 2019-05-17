@@ -9,12 +9,18 @@ char * csv_train_data_directory = "../data/data_train.csv";
 House* housesById[HASH_TABLE_SIZE];
 House* housesByNeighbor[HASH_TABLE_SIZE];
 
+House* housesById_test[HASH_TABLE_SIZE];
+House* housesByNeighbor_test[HASH_TABLE_SIZE];
+
 int main(int argc,char * argv[]){
 
-  //csv_train_data_directory = argv[1];
+  if(argv[1] != NULL) {
+    csv_train_data_directory = argv[1];
+  }
 
-  read_house_data(csv_train_data_directory, housesById, housesByNeighbor);
-
+  read_house_data(csv_train_data_directory, housesById, housesByNeighbor, TRAIN);
+  read_house_data(csv_test_data_directory, housesById_test, housesByNeighbor_test, TEST);
+  
   int cevap = 1;
   while(cevap!=0){
     printf("\nEmlak Programina Hosgeldiniz!\n");
@@ -73,7 +79,7 @@ int main(int argc,char * argv[]){
           printf("Aralik degeri girin: ");
           scanf("%d", &c_data);
         } 
-        House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        House * head = linearise_hash_table(housesById, ID);
         mean_sale_prices(head, c, c_data);
       }else {
         printf("Hatali bir deger girdiniz\n");
@@ -85,7 +91,7 @@ int main(int argc,char * argv[]){
       int limit = 0;
       printf("Ev sayisi girin: ");
       scanf("%d", &limit);
-      House * head = linearise_hash_table(housesById, HASH_TYPE_ID);
+      House * head = linearise_hash_table(housesById, ID);
       sort_houses(&head, SALEPRICE, DESC);
       print_house(head, MULTI, limit);
     }
@@ -98,7 +104,7 @@ int main(int argc,char * argv[]){
       int input = 0;
       printf("Yöntem(matrix: 0|ortalama: 1): ");
       scanf("%d", &input);
-      House* head = linearise_hash_table(housesById, HASH_TYPE_ID);
+      House* head = linearise_hash_table(housesById, ID);
 
       if (input == 0)
       {
@@ -110,23 +116,21 @@ int main(int argc,char * argv[]){
         
       } else if (input == 1)
       {
-        /* code */
+        int tmp_id = 0;
+        printf("ID degeri girin: ");
+        scanf("%d", &tmp_id);
+        House * tmp_h = get_house_byid(tmp_id, housesById);
+        printf("Tahmin Edilen:%d\nGerçek Değer:%d\n", model_by_similarity(housesByNeighbor, tmp_h), ghc_i(tmp_h, SALEPRICE));
       } else
       {
         printf("Hatali giris!\n");
-      }
-      
-      
-      
-      
-
-      
+      } 
     }
     else if(cevap==8){
       printf("ID Icin Hash Tablosu\n");
-      create_hash_table_tree(housesById, HASH_TYPE_ID);
+      create_hash_table_tree(housesById, ID);
       printf("NEIGHBORORHOODS Icin Hash Tablosu\n");
-      create_hash_table_tree(housesByNeighbor, HASH_TYPE_NEIGHBORHOODS);
+      create_hash_table_tree(housesByNeighbor, NEIGHBORHOOD);
     }
     else if (cevap == 9) {
       printf("Sirali olarak evleri bastir\n");
@@ -137,7 +141,7 @@ int main(int argc,char * argv[]){
       scanf("%d", &c);
 
       if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c==YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
-        House * tmp_head = linearise_hash_table(housesById, HASH_TYPE_ID);
+        House * tmp_head = linearise_hash_table(housesById, ID);
         sort_houses(&tmp_head, c, ASC);
         print_house(tmp_head, MULTI, LIMITLESS);
       } else {

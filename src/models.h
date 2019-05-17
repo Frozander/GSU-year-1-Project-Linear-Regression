@@ -17,7 +17,7 @@ typedef struct matrix
     double** values;
 } Matrix;
 
-int model_by_similarity(House* houses,House new_house);
+int model_by_similarity(House * houses [], House  * house);
 void create_data_matrices(House** houses,Matrix** X,Matrix** Y);
 Matrix* get_transpose(Matrix* A);
 Matrix* get_inverse(Matrix* A);

@@ -5,10 +5,6 @@
 #ifndef DATASET
 #define DATASET
 
-//hash table oluşturuken (place_house fonksyonu) fonksyon girdisini kolaylaştırmak için hard coded veriler
-#define HASH_TYPE_ID 1
-#define HASH_TYPE_NEIGHBORHOODS 2
-
 //print house fonksyonu için hardcode seçenekler
 #define SINGLE_WITH_TOP 1
 #define SINGLE_WITHOUT_TOP 0
@@ -30,6 +26,17 @@
 //Artan veya Azalan olarak sıralamak için hardcoded değerler
 #define ASC 0
 #define DESC 1
+
+//limit_houses için hardcode değerler
+#define NON -1
+#define SINGLE_CRITER {NON}
+
+//file types
+#define TEST 1
+#define TRAIN 0
+
+//operators
+
 
 /*
  * Ornek ev veri yapisi
@@ -54,7 +61,6 @@ typedef struct house{
 } House;
 
 House * linearise_hash_table (House * ht[], int hash_type);
-void read_house_data(char* filename, House * hById[], House * hByN[]);
 void create_hash_table(House * house_list_head, House * houses[], int hash_type);
 House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
@@ -69,7 +75,11 @@ void split_list(House* input, House** first_half, House** second_half);
 House* merge(House* in1, House* in2, int criter_name, int order);
 House** pull_from_table_by_id_as_headref(int id, House* house_list[]);
 void print_list(House* list_input);
-
-
-
+char * ghc_s (House * house, int criter_name);
+int ghc_i (House * house, int criter_name);
+House* limit_list(House* houses_head, int criter_name, int min, int max);
+void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
+void limit_houses(House** houses_head, int criter_name, int min, int max);
+int get_criter_avg(House* head, int criter);
+int get_list_lenght (House * head);
 #endif
