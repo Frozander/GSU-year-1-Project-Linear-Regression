@@ -136,16 +136,13 @@ void read_house_data(char* filename, House * hById[], House * hByN[], int file_t
 House* linearise_hash_table (House * ht[], int hash_type) {
 
   House * tmp;
-  printf("\nDEBUG 0\n");
   for(int i = 0; i < HASH_TABLE_SIZE; i++) {
     tmp = ht[i];
     while(ghc_p(tmp, hash_type) != NULL ) {
-      printf("\nDEBUG 1\n");
       tmp->nextHouse = ghc_p(tmp, hash_type);
       tmp = ghc_p(tmp, hash_type);
     }
     tmp->nextHouse = ht[i+1];
-    printf("\nDEBUG 2\n");
   }
   tmp->nextHouse = NULL;
   return ht[0];

@@ -27,5 +27,7 @@ Matrix* make_prediction(House* house_in,Matrix* W);
 Matrix* create_matrix(int line, int collumn);
 void print_matrix(Matrix* matrix_in);
 void free_matrix(Matrix* matrix_in);
+void file_write_house(House* house_in, FILE* stream);
+void matrix_to_house_list(Matrix* matrix_in, House* house_out, char* filename);
 
 #endif

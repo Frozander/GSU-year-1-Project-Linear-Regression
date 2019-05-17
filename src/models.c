@@ -215,3 +215,57 @@ Matrix* make_prediction(House* house_in,Matrix* W){
   
   return predicted_prices;
 }
+
+void file_write_house(House* house_in, FILE* stream){
+  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual");
+  
+  House* cursor = house_in;
+  while (cursor != NULL)
+  {
+    fprintf(stream,
+            "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
+            cursor->id,
+            cursor->lotarea,
+            cursor->street,
+            cursor->saleprice,
+            cursor->neighborhood,
+            cursor->yearbuilt,
+            cursor->overallqual,
+            cursor->overallcond,
+            convert_kitchenqual_back(cursor->kitchenqual)
+          );
+    cursor = cursor->nextHouse;
+  }
+  
+}
+
+void matrix_to_house_list(Matrix* matrix_in, House* house_out, char* filename){
+  //Error handling
+  if (matrix_in->collmuns != 1)
+  {
+    printf("\nNot a final matrix!");
+    return;
+  }
+  if (house_out == NULL)
+  {
+    printf("\nOutput list is empty");
+    return;
+  }
+
+  FILE* open_file = fopen(filename, "w");
+  House* cursor = house_out;
+  int i = 0;
+
+  while (cursor->nextHouse != NULL)
+  {
+    cursor->saleprice = matrix_in->values[i][0];
+    cursor = cursor->nextHouse;
+    i++;
+  }
+  
+  file_write_house(house_out, open_file);
+  
+  fclose(open_file);
+
+  
+}

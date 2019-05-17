@@ -105,23 +105,19 @@ int main(int argc,char * argv[]){
       printf("Yöntem(matrix: 0|ortalama: 1): ");
       scanf("%d", &input);
       House* head = linearise_hash_table(housesById, ID);
+      //sort_houses(&head, ID, ASC);
       House* head_test = linearise_hash_table(housesById_test, ID);
-
+      //sort_houses(&head_test, ID, ASC);
       if (input == 0)
       {
         Matrix* W;
-
-
-        print_house(head_test, MULTI, LIMITLESS);
-
         W = calculate_parameter(head);
-
         print_matrix(W);
         
         Matrix* prediction = make_prediction(head_test, W);
-        
-        print_matrix(prediction);
-        
+
+        //print the output
+        matrix_to_house_list(prediction, head_test, "../out/predictions.csv");        
       } else if (input == 1)
       {
         int tmp_id = 0;
