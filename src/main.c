@@ -104,6 +104,7 @@ int main(int argc,char * argv[]){
       {
         Matrix* W;
         W = calculate_parameter(head);
+        print_matrix(W);
         Matrix* prediction = make_prediction(csv_test_data_directory, W);
         print_matrix(prediction);
         

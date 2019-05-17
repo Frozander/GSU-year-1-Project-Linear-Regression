@@ -18,7 +18,7 @@ typedef struct matrix
 } Matrix;
 
 int model_by_similarity(House* houses,House new_house);
-void create_data_matrices(House* houses,Matrix* X,Matrix* Y);
+void create_data_matrices(House** houses,Matrix** X,Matrix** Y);
 Matrix* get_transpose(Matrix* A);
 Matrix* get_inverse(Matrix* A);
 Matrix* get_multiplication(Matrix* A, Matrix* B);
