@@ -83,7 +83,6 @@ void print_matrix(Matrix* matrix_in){
 }
 
 void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
-  printf("Create data matrices from dataset\n");
   House* tmp = *houses;
   int counter = 0;
   House* cur = *houses;
@@ -128,7 +127,6 @@ Matrix* get_transpose(Matrix* A){
 
 Matrix* get_inverse(Matrix* A){
   Matrix* Ainverse;
-  printf("Get inverse\n");
   /*  Frozander
     Inverse matrix sadece 2x2 fonksiyonlarda olduğu için
     onlara özel bir yöntem kullanılacak
@@ -145,7 +143,6 @@ Matrix* get_inverse(Matrix* A){
 
 Matrix* get_multiplication(Matrix* A, Matrix* B){
   Matrix* C;
-  printf("Multiplication\n");
   C = create_matrix(A->lines, B->collmuns);
   for (size_t i = 0; i < C->lines; i++)
   {
@@ -165,7 +162,6 @@ Matrix* calculate_parameter(House* houses){
   Matrix* W;
   Matrix* X;
   Matrix* Y;
-  printf("Calculate parameters for dataset\n");
   create_data_matrices(&houses, &X, &Y);
   Matrix* X_transpose = get_transpose(X);
   Matrix* tmp_matrix = get_multiplication(X_transpose, X);
@@ -181,7 +177,7 @@ Matrix* calculate_parameter(House* houses){
   return W;
 }
 
-Matrix* make_prediction(char* filename,Matrix* W){
+Matrix* make_prediction(House* house_in,Matrix* W){
   Matrix* predicted_prices;
   printf("Make prediction\n");
   // TODO
@@ -192,20 +188,20 @@ Matrix* make_prediction(char* filename,Matrix* W){
   //  fiyat tahmini yap, burda yapilmasi gereken
   //  X ve W matrislerinin carpimini bulmak
   // 4 - Sonuclari bir dosyaya yaz
-  House* house_id[100];
-  House* house_neighbor[100];
-  read_house_data(filename, house_id, house_neighbor, TRAIN);
-  House* linear_houses = linearise_hash_table(house_id, ID);
-  House* tmp = linear_houses;
+  //print_house(linear_houses, MULTI, 0);
+  House* tmp = house_in;
   int counter = 0;
-  House* cur = linear_houses;
+  House* cur = house_in;
+  
   while (cur!=NULL)
   {
     counter++;
     cur = cur->nextHouse;
   }
+  
   Matrix* X= create_matrix(counter, 2);
   int k = 0;
+  
   while (tmp != NULL)
   {
     X->values[k][0] = 1;
@@ -213,7 +209,9 @@ Matrix* make_prediction(char* filename,Matrix* W){
     tmp = tmp->nextHouse;
     k++;
   } 
+  
   predicted_prices = get_multiplication(X, W);
   free_matrix(X);
+  
   return predicted_prices;
 }
