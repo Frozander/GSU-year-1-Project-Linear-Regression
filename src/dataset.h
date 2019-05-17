@@ -22,6 +22,9 @@
 #define OVERALLQUAL 6
 #define OVERALLCOND 7
 #define KITCHENQUAL 8
+#define NEXT_HOUSE 9
+#define NEXT_HOUSE_BY_ID 10
+#define NEXT_HOUSE_BY_NEIGHBORHOOD 11
 
 //Artan veya Azalan olarak sıralamak için hardcoded değerler
 #define ASC 0
@@ -77,6 +80,7 @@ House** pull_from_table_by_id_as_headref(int id, House* house_list[]);
 void print_list(House* list_input);
 char * ghc_s (House * house, int criter_name);
 int ghc_i (House * house, int criter_name);
+House * ghc_p (House * house, int criter_name);
 House* limit_list(House* houses_head, int criter_name, int min, int max);
 void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
 void limit_houses(House** houses_head, int criter_name, int min, int max);

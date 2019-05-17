@@ -3,6 +3,7 @@
 #include<stdlib.h>
 
 #define HASH_TABLE_SIZE_TYPE_ID 100
+#define HASH_TABLE_SIZE 100
 #define HASH_TABLE_SIZE_TYPE_NEIGHBOR ('Z' - 'A') * 2
 #define LINE_BUFFER_SIZE 1024
 
@@ -130,29 +131,26 @@ void read_house_data(char* filename, House * hById[], House * hByN[], int file_t
   fclose(fp);
 }
 
+
 //verilen hash table ı House yapılarındaki NextHouse pointerını değiştirerek link list hale getirir
 House* linearise_hash_table (House * ht[], int hash_type) {
+
   House * tmp;
-  int counter;
-  switch (hash_type)
-  {
-  case ID:
-    
-    counter = ht[0]->id;
-    tmp = get_house_byid(counter, ht);
-    while (get_house_byid(counter, ht) != NULL) {    
-      tmp->nextHouse = get_house_byid(counter, ht);
-      counter++;
-      tmp = tmp->nextHouse;
+  printf("\nDEBUG 0\n");
+  for(int i = 0; i < HASH_TABLE_SIZE; i++) {
+    tmp = ht[i];
+    while(ghc_p(tmp, hash_type) != NULL ) {
+      printf("\nDEBUG 1\n");
+      tmp->nextHouse = ghc_p(tmp, hash_type);
+      tmp = ghc_p(tmp, hash_type);
     }
-    tmp->nextHouse = NULL;
-    return ht[0];
-    break;
-  
-  default:
-    break;
+    tmp->nextHouse = ht[i+1];
+    printf("\nDEBUG 2\n");
   }
+  tmp->nextHouse = NULL;
+  return ht[0];
 }
+
 
 //Aldığı hash table ın haritasını çıkardır (elemanların id lerini bastırır)
 void create_hash_table_tree(House * houses[], int hash_type) {
@@ -402,6 +400,29 @@ int ghc_i (House * house, int criter_name) {
     default:
       break;
     }
+}
+
+House * ghc_p (House * house, int criter_name) {
+  switch (criter_name)
+  {
+  case ID:
+    return house->nextHouseById;
+    break;
+  case NEXT_HOUSE_BY_ID:
+    return house->nextHouseById;
+    break;
+  case NEIGHBORHOOD:
+    return house->nextHouseByNeighbor;
+    break;
+  case NEXT_HOUSE_BY_NEIGHBORHOOD:
+    return house->nextHouseByNeighbor;
+    break;
+  case NEXT_HOUSE:
+    return house->nextHouse;
+    break;
+  default:
+    break;
+  }
 }
 
 //string cinsinde ev verisi döndürür
