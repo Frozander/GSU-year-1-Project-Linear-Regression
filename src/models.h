@@ -10,7 +10,7 @@
 // Gerekli veri tanimlarini burada yapabilirsiniz
 
 
-int model_by_similarity(House* houses,House new_house);
+int model_by_similarity(House * houses [], House  * house);
 void create_data_matrices(House* houses,int** X,int* y);
 int** get_transpose(int** A);
 int** get_inverse(int** A);

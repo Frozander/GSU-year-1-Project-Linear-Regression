@@ -27,12 +27,16 @@
 #define ASC 0
 #define DESC 1
 
-//limit_list için hardcode değerler
+//limit_houses için hardcode değerler
 #define NON -1
+#define SINGLE_CRITER {NON}
 
 //file types
 #define TEST 1
 #define TRAIN 0
+
+//operators
+
 
 /*
  * Ornek ev veri yapisi
@@ -62,7 +66,7 @@ House* get_neighborhoods(House * house, House * houses[]);
 void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
 void mean_sale_prices(House* houses_head, int criter_name, int criter_data);
-House* sort_houses(House** houses, int criter_name, int order);
+void sort_houses(House** houses, int criter_name, int order);
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
 char * convert_kitchenqual_back (int value);
@@ -75,5 +79,7 @@ char * ghc_s (House * house, int criter_name);
 int ghc_i (House * house, int criter_name);
 House* limit_list(House* houses_head, int criter_name, int min, int max);
 void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
-
+void limit_houses(House** houses_head, int criter_name, int min, int max);
+int get_criter_avg(House* head, int criter);
+int get_list_lenght (House * head);
 #endif

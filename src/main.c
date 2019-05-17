@@ -101,6 +101,11 @@ int main(int argc,char * argv[]){
     }
     else if(cevap==7){
       printf("Fiyat tahmini yap\n");
+      int tmp_id = 0;
+      printf("ID degeri girin: ");
+      scanf("%d", &tmp_id);
+      House * tmp_h = get_house_byid(tmp_id, housesById);
+      printf("Tahmin Edilen:%d\nGerçek Değer:%d\n", model_by_similarity(housesByNeighbor, tmp_h), ghc_i(tmp_h, SALEPRICE));
     }
     else if(cevap==8){
       printf("ID Icin Hash Tablosu\n");

@@ -186,7 +186,6 @@ void create_hash_table_tree(House * houses[], int hash_type) {
   }
 }
 
-
 //Aldığı evi ekrana yazdıran fonksyon
 void print_house(House * house, int style, int limit){
 
@@ -296,27 +295,77 @@ House* get_neighborhoods(House * house, House * houses[]){
   return houses[hashIndex];
 }
 
-//İstenilen alt üst değere göre verilen bağlı listeyi kırpar 
-House* limit_list(House* houses_head, int criter_name, int min, int max){
+
+//İstenilen alt üst değere göre verilen bağlı listeyi kırpar, NON kullanılarak min veya max belirlenmeyebilir
+void limit_houses(House** houses_head, int criter_name, int min, int max){
   
-  House * tmp_h = houses_head;
-  
-  if(max != NON) {
-    sort_houses(&houses_head, criter_name, DESC);
-    while (ghc_i(tmp_h, criter_name) > max) {
-      tmp_h = tmp_h->nextHouse;
+  sort_houses(houses_head, criter_name, ASC); //İstenilen kritere göre küçükten büyüğe listeyi sıralıyoruz
+  House * tmp = *houses_head; //Listede gezmek için listenin başını bir pointera koyuyoruz
+
+  if(min != NON) { //Eğer min değeri yok denilmemişse
+    while (tmp->nextHouse != NULL) { //Liste bitene kadar gez diyoruz
+      if(ghc_i(tmp, criter_name) < min) { //Her elemanı minimumla karşılaştırıyoruz
+        tmp = tmp->nextHouse; //Eğer minimumdan küçükse sonraki elemana geçiyoruz
+      } else {
+        houses_head = &tmp; //Eğer büyük veya eşitse onu kafa olarak geri döndürüyoruz (Verilen adrese pointerın adresini yazıyoruz)
+        break; //Ve while dan çıkıyoruz
+      }
     }
-    tmp_h->nextHouse = NULL;
   }
 
-  sort_houses(&houses_head, criter_name, ASC);
-  if(min != NON) {
-    while (ghc_i(tmp_h, criter_name) < min) {
-      tmp_h = tmp_h->nextHouse;
+  if(max != NON) { //Eğer maksimum değer yok denilmemişse
+    while (tmp->nextHouse != NULL) { //Liste bitena kadar gez diyoruz
+      if(ghc_i(tmp->nextHouse, criter_name) <= max) { //Her elemanın bir sonraki elemanını maksimumla karşılaştırıyoruz, yukarda kaldığımız yerden devam ediyoruz
+        tmp = tmp->nextHouse; //Eğer sonraki eleman maksimumdan küçük veya eşitse sonraki elemana geçiyoruz
+      } else {
+        tmp->nextHouse = NULL; //Eğer sonraki eleman maksimumdan büyükse elimizdeki elemanın sonrasını NULL yaparak onu son eleman haline getiriyoruz
+      }
     }
   }
+}
+
+int get_criter_avg(House* head, int criter) {
+
+  int sum = 0;
+  int counter = 0;
+  while (head->nextHouse != NULL) {
+    sum += ghc_i(head, criter);
+    head = head->nextHouse;
+    counter++;
+  }
+  if(counter != 0) {
+    return sum/counter;
+  } else {
+    printf("crtier hatasi");
+    return 0;
+  }
   
-  return tmp_h;
+}
+
+int get_list_lenght (House * head) {
+  if (head != NULL) {
+    int counter = 1;
+    while(head->nextHouse != NULL) {
+      counter++;
+      head = head->nextHouse;
+    }
+    return counter;
+  }else {
+    printf("head = NULL");
+    return 0;
+  }
+  
+}
+
+int ghc_i_avg (House * house, int * criter_names) {
+  int sum = 0;
+  int counter = 0;
+  while (counter < sizeof(criter_names) ) {
+    sum += ghc_i(house, criter_names[counter]);  
+    counter++;
+  }
+
+  return sum/counter;
 }
 
 //integer değerinde ev verisi döndürür
@@ -499,9 +548,8 @@ void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
 }
 
 //link list olarak alınan evleri sıralayan fonksyon
-House* sort_houses(House** houses, int criter_name, int order){
+void sort_houses(House** houses, int criter_name, int order){
   merge_sort(houses, criter_name, order);
-  return *houses;
 }
 
 //ikili karakter cinsinden alınan kitchenqual verisini 5-1 arası sayıya dönüştürür
