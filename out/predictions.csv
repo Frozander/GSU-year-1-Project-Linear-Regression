@@ -1,6 +1,4 @@
-id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual100,9320,Pave,178847,NAmes,1959,4,5,TA
-100,0,,160017,,0,0,0,(null)
-1,8450,Pave,177090,CollgCr,2003,7,5,Gd
+id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual1,8450,Pave,177090,CollgCr,2003,7,5,Gd
 2,9600,Pave,179413,Veenker,1976,6,8,TA
 3,11250,Pave,182747,CollgCr,2001,7,5,Gd
 4,9550,Pave,179312,Crawfor,1915,7,5,Gd
@@ -98,4 +96,6 @@ id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitch
 96,9765,Pave,179747,Gilbert,1993,6,8,TA
 97,10264,Pave,180755,CollgCr,1999,7,5,Gd
 98,10921,Pave,182082,Edwards,1965,4,5,TA
-99,10625,Pave,0,Edwards,1920,5,5,TA
+99,10625,Pave,181484,Edwards,1920,5,5,TA
+100,9320,Pave,178847,NAmes,1959,4,5,TA
+100,0,,0,,0,0,0,(null)

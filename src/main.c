@@ -114,10 +114,12 @@ int main(int argc,char * argv[]){
         W = calculate_parameter(head);
         print_matrix(W);
         
-        Matrix* prediction = make_prediction(head_test, W);
+        Matrix* prediction = make_prediction(&head_test, W);
 
         //print the output
-        matrix_to_house_list(prediction, head_test, "../out/predictions.csv");        
+        matrix_to_house_list(prediction, &head_test);        
+        file_write_house(&head_test, "../out/predictions.csv");
+        printf("Predictions are printed in /out/predictions.csv\n");
       } else if (input == 1)
       {
         int tmp_id = 0;

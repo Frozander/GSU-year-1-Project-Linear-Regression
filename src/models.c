@@ -177,7 +177,7 @@ Matrix* calculate_parameter(House* houses){
   return W;
 }
 
-Matrix* make_prediction(House* house_in,Matrix* W){
+Matrix* make_prediction(House** house_in,Matrix* W){
   Matrix* predicted_prices;
   printf("Make prediction\n");
   // TODO
@@ -189,9 +189,9 @@ Matrix* make_prediction(House* house_in,Matrix* W){
   //  X ve W matrislerinin carpimini bulmak
   // 4 - Sonuclari bir dosyaya yaz
   //print_house(linear_houses, MULTI, 0);
-  House* tmp = house_in;
+  House* tmp = *house_in;
   int counter = 0;
-  House* cur = house_in;
+  House* cur = *house_in;
   
   while (cur!=NULL)
   {
@@ -216,10 +216,12 @@ Matrix* make_prediction(House* house_in,Matrix* W){
   return predicted_prices;
 }
 
-void file_write_house(House* house_in, FILE* stream){
+void file_write_house(House** house_in, char* filename){
+  FILE* stream = fopen(filename, "w");
+
   fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual");
   
-  House* cursor = house_in;
+  House* cursor = *house_in;
   while (cursor != NULL)
   {
     fprintf(stream,
@@ -236,10 +238,12 @@ void file_write_house(House* house_in, FILE* stream){
           );
     cursor = cursor->nextHouse;
   }
+
+  fclose(stream);
   
 }
 
-void matrix_to_house_list(Matrix* matrix_in, House* house_out, char* filename){
+void matrix_to_house_list(Matrix* matrix_in, House** house_out){
   //Error handling
   if (matrix_in->collmuns != 1)
   {
@@ -252,8 +256,7 @@ void matrix_to_house_list(Matrix* matrix_in, House* house_out, char* filename){
     return;
   }
 
-  FILE* open_file = fopen(filename, "w");
-  House* cursor = house_out;
+  House* cursor = *house_out;
   int i = 0;
 
   while (cursor->nextHouse != NULL)
@@ -262,10 +265,5 @@ void matrix_to_house_list(Matrix* matrix_in, House* house_out, char* filename){
     cursor = cursor->nextHouse;
     i++;
   }
-  
-  file_write_house(house_out, open_file);
-  
-  fclose(open_file);
-
   
 }
