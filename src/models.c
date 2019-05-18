@@ -46,7 +46,7 @@ Matrix* create_matrix(int line, int collumn){
   Matrix* new_matrix = malloc(sizeof(Matrix));
   // Daha sonra kullanmak için boyutu satır ve sütun şeklinde saklayan değerler atanır
   new_matrix->lines = line;
-  new_matrix->collmuns = collumn;
+  new_matrix->columns = collumn;
   // Verilerin tutulduğu values double** iki boyutlu arrayinin 1. boyutu oluşturulur (satır)
   new_matrix->values = malloc(line * sizeof(double *));
   //For düngüsü ile 1. boyuttaki tüm değerler için sütunlar oluşturulur
@@ -74,7 +74,7 @@ void print_matrix(Matrix* matrix_in){
   printf("Printing Matrix\n");
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
-    for (size_t j = 0; j < matrix_in->collmuns; j++)
+    for (size_t j = 0; j < matrix_in->columns; j++)
     {
       printf("%.2lf ", matrix_in->values[i][j]);
     }
@@ -114,10 +114,10 @@ void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
 
 Matrix* get_transpose(Matrix* A){
   Matrix* Atranspose;
-  Atranspose = create_matrix(A->collmuns, A->lines);
+  Atranspose = create_matrix(A->columns, A->lines);
   for (size_t i = 0; i < A->lines; i++)
   {
-    for (size_t j = 0; j < A->collmuns; j++)
+    for (size_t j = 0; j < A->columns; j++)
     {
       Atranspose->values[j][i] = A->values[i][j];
     }
@@ -143,13 +143,13 @@ Matrix* get_inverse(Matrix* A){
 
 Matrix* get_multiplication(Matrix* A, Matrix* B){
   Matrix* C;
-  C = create_matrix(A->lines, B->collmuns);
+  C = create_matrix(A->lines, B->columns);
   for (size_t i = 0; i < C->lines; i++)
   {
-    for (size_t j = 0; j < C->collmuns; j++)
+    for (size_t j = 0; j < C->columns; j++)
     {
       C->values[i][j] = 0;
-      for (size_t k = 0; k < A->collmuns; k++)
+      for (size_t k = 0; k < A->columns; k++)
       {
         C->values[i][j] += A->values[i][k] * B->values[k][j];
       }
@@ -245,7 +245,7 @@ void file_write_house(House** house_in, char* filename){
 
 void matrix_to_house_list(Matrix* matrix_in, House** house_out){
   //Error handling
-  if (matrix_in->collmuns != 1)
+  if (matrix_in->columns != 1)
   {
     printf("\nNot a final matrix!");
     return;

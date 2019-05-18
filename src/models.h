@@ -12,7 +12,7 @@ typedef struct matrix
 {
     // Lines and collumns for the matrix
     int lines;
-    int collmuns;
+    int columns;
     // Two dimensional array for values
     double** values;
 } Matrix;
