@@ -71,7 +71,7 @@ void free_matrix(Matrix* matrix_in){
 }
 
 void print_matrix(Matrix* matrix_in){
-  printf("Printing Matrix\n");
+  printf("Matris Basiliyor\n");
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
     for (size_t j = 0; j < matrix_in->columns; j++)
@@ -246,12 +246,12 @@ void matrix_to_house_list(Matrix* matrix_in, House** house_out){
   //Error handling
   if (matrix_in->columns != 1)
   {
-    printf("\nNot a final matrix!");
+    printf("\nFinal matrisi degil!");
     return;
   }
   if (house_out == NULL)
   {
-    printf("\nOutput list is empty");
+    printf("\nCikti listesi bos!");
     return;
   }
 

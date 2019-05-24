@@ -102,10 +102,10 @@ int main(int argc,char * argv[]){
       if (tmp_head != NULL)
       {
         file_write_house(&tmp_head, "../out/sortedhouses.csv");
-        printf("\nSorted houses are printed at ../out/sortedhouses.csv\n");
+        printf("\nSiralanan evler \"../out/sortedhouses.csv\"ye kaydedildi\n");
       } else
       {
-        printf("\nHouses are not sorted yet!\nFirst use option 9 to sort the houses\n");
+        printf("\nEvler siralanmamis!\nOnce 9'u kullanarak evleri siralayin\n");
       }
       
             
@@ -123,14 +123,14 @@ int main(int argc,char * argv[]){
         Matrix* W;
         W = calculate_parameter(head);
         //print_matrix(W);
-        printf("%s\n Y = %.2lfX + %.2lf", "\nOutput Values on the XY Plane:", W->values[1][0], W->values[0][0]);
+        printf("%s\n Y = %.2lfX + %.2lf", "\nTahmin dogrusunun XY duzlemi uzerinde gosterimi:", W->values[1][0], W->values[0][0]);
         
         Matrix* prediction = make_prediction(&head_test, W);
 
         //print the output
         matrix_to_house_list(prediction, &head_test);        
         file_write_house(&head_test, "../out/predictions.csv");
-        printf("\nPredictions are printed in ../out/predictions.csv\n");
+        printf("\nTahminler \"../out/predictions.csv\"ye kaydedildi\n");
       } else if (input == 1)
       {
         int tmp_id = 0;
