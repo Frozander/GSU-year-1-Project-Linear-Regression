@@ -105,9 +105,8 @@ int main(int argc,char * argv[]){
       printf("Yöntem(matrix: 0|ortalama: 1): ");
       scanf("%d", &input);
       House* head = linearise_hash_table(housesById, ID);
-      //sort_houses(&head, ID, ASC);
       House* head_test = linearise_hash_table(housesById_test, ID);
-      //sort_houses(&head_test, ID, ASC);
+      sort_houses(&head_test, ID, ASC);
       if (input == 0)
       {
         Matrix* W;

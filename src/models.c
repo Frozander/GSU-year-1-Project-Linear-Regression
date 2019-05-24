@@ -219,7 +219,7 @@ Matrix* make_prediction(House** house_in,Matrix* W){
 void file_write_house(House** house_in, char* filename){
   FILE* stream = fopen(filename, "w");
 
-  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual");
+  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual\n");
   
   House* cursor = *house_in;
   while (cursor != NULL)
@@ -259,7 +259,7 @@ void matrix_to_house_list(Matrix* matrix_in, House** house_out){
   House* cursor = *house_out;
   int i = 0;
 
-  while (cursor->nextHouse != NULL)
+  while (cursor != NULL)
   {
     cursor->saleprice = matrix_in->values[i][0];
     cursor = cursor->nextHouse;

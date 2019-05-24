@@ -111,9 +111,12 @@ void read_house_data(char* filename, House * hById[], House * hByN[], int file_t
 
     while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
       fgets(buffer, LINE_BUFFER_SIZE, fp); 
-      tmp = write_house(buffer, file_type);
-      place_house(tmp, hById, ID);
-      place_house(tmp, hByN, NEIGHBORHOOD);
+      if(buffer[0] != '\0'){
+        tmp = write_house(buffer, file_type);
+        place_house(tmp, hById, ID);
+        place_house(tmp, hByN, NEIGHBORHOOD);
+      }
+      strcpy(buffer, "");
     }
 
     /* berkay-yildiz:
