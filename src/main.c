@@ -12,6 +12,9 @@ House* housesByNeighbor[HASH_TABLE_SIZE];
 House* housesById_test[HASH_TABLE_SIZE];
 House* housesByNeighbor_test[HASH_TABLE_SIZE];
 
+//For printing the sorted list to output
+House * tmp_head;
+
 int main(int argc,char * argv[]){
 
   if(argv[1] != NULL) {
@@ -96,8 +99,16 @@ int main(int argc,char * argv[]){
       print_house(head, MULTI, limit);
     }
     else if (cevap==6){
-      printf("Sirali evler\n");
-        // TODO 
+      if (tmp_head != NULL)
+      {
+        file_write_house(&tmp_head, "../out/sortedhouses.csv");
+        printf("\nSorted houses are printed at ../out/sortedhouses.csv\n");
+      } else
+      {
+        printf("\nHouses are not sorted yet!\nFirst use option 9 to sort the houses\n");
+      }
+      
+            
     }
     else if(cevap==7){
       printf("Fiyat tahmini yap\n");
@@ -111,14 +122,15 @@ int main(int argc,char * argv[]){
       {
         Matrix* W;
         W = calculate_parameter(head);
-        print_matrix(W);
+        //print_matrix(W);
+        printf("%s\n Y = %.2lfX + %.2lf", "\nOutput Values on the XY Plane:", W->values[1][0], W->values[0][0]);
         
         Matrix* prediction = make_prediction(&head_test, W);
 
         //print the output
         matrix_to_house_list(prediction, &head_test);        
         file_write_house(&head_test, "../out/predictions.csv");
-        printf("Predictions are printed in /out/predictions.csv\n");
+        printf("\nPredictions are printed in ../out/predictions.csv\n");
       } else if (input == 1)
       {
         int tmp_id = 0;
@@ -146,7 +158,7 @@ int main(int argc,char * argv[]){
       scanf("%d", &c);
 
       if(c==LOTAREA || c==STREET || c==NEIGHBORHOOD || c==YEARBUILT || c==OVERALLQUAL || c==OVERALLCOND || c==KITCHENQUAL) {
-        House * tmp_head = linearise_hash_table(housesById, ID);
+        tmp_head = linearise_hash_table(housesById, ID);
         sort_houses(&tmp_head, c, ASC);
         print_house(tmp_head, MULTI, LIMITLESS);
       } else {

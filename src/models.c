@@ -179,7 +179,6 @@ Matrix* calculate_parameter(House* houses){
 
 Matrix* make_prediction(House** house_in,Matrix* W){
   Matrix* predicted_prices;
-  printf("Make prediction\n");
   // TODO
   // 1 - filename olarak verilen test verisini oku,
   //   yeni houses dizisi olustur
