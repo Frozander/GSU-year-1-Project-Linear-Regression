@@ -32,7 +32,6 @@
 
 //limit_houses için hardcode değerler
 #define NON -1
-#define SINGLE_CRITER {NON}
 
 //file types
 #define TEST 1
