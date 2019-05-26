@@ -2,21 +2,25 @@
 #include"dataset.h"
 #include<stdio.h>
 
+House * model_by_similarity_list (House * houses [], House  * house) {
+  
+}
+
 
 int model_by_similarity(House * houses [], House  * house) {
   House * head;
   int avg;
   int gap;
-
-  head = get_neighborhoods(house, houses);
-  printf("\nKomsular alindi\nKomsu sayisi: %d\n", get_list_lenght(head));
+  int lenght;
+  head = get_neighborhoods(house, houses, &lenght);
+  printf("\nKomsular alindi\nKomsu sayisi: %d\n", lenght);
 
   gap = 2000;
-  limit_houses(&head, LOTAREA, (house->lotarea - gap), (house->lotarea + gap));
+  limit_houses(&head, LOTAREA, (house->lotarea - gap), (house->lotarea + gap), &lenght);
   printf("\nLotarea ya göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
 
   gap = 5;
-  limit_houses(&head, YEARBUILT, (house->yearbuilt - gap), (house->yearbuilt + gap));
+  limit_houses(&head, YEARBUILT, (house->yearbuilt - gap), (house->yearbuilt + gap), &lenght);
   printf("\nYearbuilt e göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
 
   return get_criter_avg(head, SALEPRICE);
@@ -213,33 +217,6 @@ Matrix* make_prediction(House** house_in,Matrix* W){
   free_matrix(X);
   
   return predicted_prices;
-}
-
-void file_write_house(House** house_in, char* filename){
-  FILE* stream = fopen(filename, "w");
-
-  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual\n");
-  
-  House* cursor = *house_in;
-  while (cursor != NULL)
-  {
-    fprintf(stream,
-            "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
-            cursor->id,
-            cursor->lotarea,
-            cursor->street,
-            cursor->saleprice,
-            cursor->neighborhood,
-            cursor->yearbuilt,
-            cursor->overallqual,
-            cursor->overallcond,
-            convert_kitchenqual_back(cursor->kitchenqual)
-          );
-    cursor = cursor->nextHouse;
-  }
-
-  fclose(stream);
-  
 }
 
 void matrix_to_house_list(Matrix* matrix_in, House** house_out){

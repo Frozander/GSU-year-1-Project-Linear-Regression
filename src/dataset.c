@@ -2,15 +2,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define HASH_TABLE_SIZE_TYPE_ID 100
-#define HASH_TABLE_SIZE 100
-#define HASH_TABLE_SIZE_TYPE_NEIGHBOR ('Z' - 'A') * 2
-#define LINE_BUFFER_SIZE 1024
 
 
 //Verilen id için hash değeri döndürür
 int hash_code(int id) {
-  return id % HASH_TABLE_SIZE_TYPE_ID;
+  return id % HASH_TABLE_SIZE;
 }
 
 //komşuluk değeri için hash değeri döndürür
@@ -136,18 +132,22 @@ void read_house_data(char* filename, House * hById[], House * hByN[], int file_t
 
 
 //verilen hash table ı House yapılarındaki NextHouse pointerını değiştirerek link list hale getirir
-House* linearise_hash_table (House * ht[], int hash_type) {
+House* linearise_hash_table (House * ht[], int hash_type, int * lenght) {
 
   House * tmp;
+  int counter = 0;
   for(int i = 0; i < HASH_TABLE_SIZE; i++) {
     tmp = ht[i];
     while(ghc_p(tmp, hash_type) != NULL ) {
       tmp->nextHouse = ghc_p(tmp, hash_type);
       tmp = ghc_p(tmp, hash_type);
+      counter ++;
     }
     tmp->nextHouse = ht[i+1];
+    counter ++;
   }
   tmp->nextHouse = NULL;
+  *lenght = counter;
   return ht[0];
 }
 
@@ -160,7 +160,7 @@ void create_hash_table_tree(House * houses[], int hash_type) {
   burayı yapıyı kontrol etmek için yazdım.
   Daha sonrasında hash table ı başka şekillerde hashlarsak buradan nasıl bir yapı oluştuğunu kolayca görebiliriz.
   */
-  int size = (hash_type == ID) ? HASH_TABLE_SIZE_TYPE_ID : HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+  int size = (hash_type == ID) ? HASH_TABLE_SIZE : HASH_TABLE_SIZE_TYPE_NEIGHBOR;
   for(int i = 0; i < size; i++) {
     House * tmp;
     printf("\nhash: %-3d| ", i);
@@ -187,72 +187,125 @@ void create_hash_table_tree(House * houses[], int hash_type) {
 //Aldığı evi ekrana yazdıran fonksyon
 void print_house(House * house, int style, int limit){
 
-  if(style) {
-    printf(
-      "\n%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s\n", //Üst bilgi kısmını yazdırıyoruz
-      "id",
-      "lotarea",
-      "street",
-      "saleprice",
-      "neighborhood",
-      "yearbuilt",
-      "overallqual",
-      "overallcond",
-      "kitchenqual"
-    );
-  }
-  
-  if(style == MULTI) {
-    if (limit == LIMITLESS) {
-      while (house->nextHouse != NULL) {
-        printf(
-          "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
-          house->id,
-          house->lotarea,
-          house->street,
-          house->saleprice,
-          house->neighborhood,
-          house->yearbuilt,
-          house->overallqual,
-          house->overallcond,
-          convert_kitchenqual_back(house->kitchenqual)
-        );
-        house = house->nextHouse;
-      }
-      print_house(house, SINGLE_WITHOUT_TOP, LIMITLESS);//döngüde basılmayan son değeri baskıyoruz
-    } else {
-      for (int i = 0; i < limit; i++) {
-        printf(
-          "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
-          house->id,
-          house->lotarea,
-          house->street,
-          house->saleprice,
-          house->neighborhood,
-          house->yearbuilt,
-          house->overallqual,
-          house->overallcond,
-          convert_kitchenqual_back(house->kitchenqual)
-        );
-        house = house->nextHouse;
-      }
+  if(house != NULL) {
+    if(style) {
+      printf( CYAN
+        "\n%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s%-15s\n", //Üst bilgi kısmını yazdırıyoruz
+        "id",
+        "lotarea",
+        "street",
+        "saleprice",
+        "neighborhood",
+        "yearbuilt",
+        "overallqual",
+        "overallcond",
+        "kitchenqual"
+      );
     }
+
+    int color = 0;
     
-  }else if(style == SINGLE_WITH_TOP || style == SINGLE_WITHOUT_TOP){
-    printf(
-      "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
-      house->id,
-      house->lotarea,
-      house->street,
-      house->saleprice,
-      house->neighborhood,
-      house->yearbuilt,
-      house->overallqual,
-      house->overallcond,
-      convert_kitchenqual_back(house->kitchenqual)
-    );
+    if(style == MULTI) {
+      if (limit == LIMITLESS) {
+        while (house != NULL) {
+          printf( (color%2 == 0) 
+            ? GREEN "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n"
+            : BLUE "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+            house->id,
+            house->lotarea,
+            house->street,
+            house->saleprice,
+            house->neighborhood,
+            house->yearbuilt,
+            house->overallqual,
+            house->overallcond,
+            convert_kitchenqual_back(house->kitchenqual)
+          );
+          house = house->nextHouse;
+          color++;
+        }
+      } else {
+        for (int i = 0; house != NULL && i < limit; i++) {
+          printf((color%2 == 0) 
+            ? GREEN "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n"
+            : BLUE "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+            house->id,
+            house->lotarea,
+            house->street,
+            house->saleprice,
+            house->neighborhood,
+            house->yearbuilt,
+            house->overallqual,
+            house->overallcond,
+            convert_kitchenqual_back(house->kitchenqual)
+          );
+          house = house->nextHouse;
+          color++;
+        }
+      }
+      
+    }else if(style == SINGLE_WITH_TOP || style == SINGLE_WITHOUT_TOP){
+      printf( GREEN
+        "%-15d%-15d%-15s%-15d%-15s%-15d%-15d%-15d%-15s\n", //Alınan evin verisini yazdırıyoruz
+        house->id,
+        house->lotarea,
+        house->street,
+        house->saleprice,
+        house->neighborhood,
+        house->yearbuilt,
+        house->overallqual,
+        house->overallcond,
+        convert_kitchenqual_back(house->kitchenqual)
+      );
+    }
+  }else {
+    if(style == SINGLE_WITH_TOP || style == SINGLE_WITHOUT_TOP) {
+      printf(RED "\nBastirilmak istenilen ev yok\n" RESET);
+    } else {
+      printf(RED "\nBastirilmak istenilen ev dizisi bos\n" RESET);
+    }
+  }  
+}
+
+void write_house_to_file(House* head, char* filename, int limit){
+  FILE* stream = fopen(filename, "w");
+
+  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual\n");
+  if (limit == LIMITLESS) {
+    while (head != NULL)  {
+      fprintf(stream,
+              "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
+              head->id,
+              head->lotarea,
+              head->street,
+              head->saleprice,
+              head->neighborhood,
+              head->yearbuilt,
+              head->overallqual,
+              head->overallcond,
+              convert_kitchenqual_back(head->kitchenqual)
+            );
+      head = head->nextHouse;
+    }
+  } else {
+    for (int i = 0; head != NULL && i < limit; i++)  {
+      fprintf(stream,
+              "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
+              head->id,
+              head->lotarea,
+              head->street,
+              head->saleprice,
+              head->neighborhood,
+              head->yearbuilt,
+              head->overallqual,
+              head->overallcond,
+              convert_kitchenqual_back(head->kitchenqual)
+            );
+      head = head->nextHouse;
+    }
   }
-  
+
+  fclose(stream);
   
 }
 
@@ -268,57 +321,63 @@ House* get_house_byid(int id, House * houses[]){
       tmp_house = tmp_house->nextHouseById;
       if (tmp_house->id == id) return tmp_house;
     }
+    return NULL;
+  } else {
+    return NULL;
   }
-
-  /* berkay-yildiz:
-    eğer tabloda olmayan bir id girilirse pointerda kalan adres geri dönüyor, çok önemli sayılmaz ama sona doğru halledilmeli
-   */
-
 }
 
 //Verilen evin komşularını bağlı liste olarak döndüren fonksyon
-House* get_neighborhoods(House * house, House * houses[]){
-  int hashIndex = hash_code_n(house->neighborhood);
-  while (strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
-    hashIndex++;
-    hashIndex %= HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+House* get_neighborhoods(House * house, House * houses[], int * lenght){
+  if(house != NULL) {
+    int hashIndex = hash_code_n(house->neighborhood);
+    int counter = 1;
+    while (strcmp(houses[hashIndex]->neighborhood, house->neighborhood) != 0) {
+      hashIndex++;
+      hashIndex %= HASH_TABLE_SIZE_TYPE_NEIGHBOR;
+    }
+    House * tmp = houses[hashIndex];
+    while (tmp->nextHouseByNeighbor != NULL) {
+      tmp->nextHouse = tmp->nextHouseByNeighbor;
+      tmp = tmp->nextHouseByNeighbor;
+      counter ++;
+    }
+    tmp->nextHouse = NULL;
+    *lenght = counter;
+    return houses[hashIndex];
+  } else {
+    return NULL;
   }
-  House * tmp = houses[hashIndex];
-  while (tmp->nextHouseByNeighbor != NULL) {
-    tmp->nextHouse = tmp->nextHouseByNeighbor;
-    tmp = tmp->nextHouseByNeighbor;
-  }
-  tmp->nextHouse = NULL;
-
-  return houses[hashIndex];
+  
 }
 
 
 //İstenilen alt üst değere göre verilen bağlı listeyi kırpar, NON kullanılarak min veya max belirlenmeyebilir
-void limit_houses(House** houses_head, int criter_name, int min, int max){
-  
-  sort_houses(houses_head, criter_name, ASC); //İstenilen kritere göre küçükten büyüğe listeyi sıralıyoruz
-  House * tmp = *houses_head; //Listede gezmek için listenin başını bir pointera koyuyoruz
-
-  if(min != NON) { //Eğer min değeri yok denilmemişse
-    while (tmp->nextHouse != NULL) { //Liste bitene kadar gez diyoruz
-      if(ghc_i(tmp, criter_name) < min) { //Her elemanı minimumla karşılaştırıyoruz
-        tmp = tmp->nextHouse; //Eğer minimumdan küçükse sonraki elemana geçiyoruz
-      } else {
-        houses_head = &tmp; //Eğer büyük veya eşitse onu kafa olarak geri döndürüyoruz (Verilen adrese pointerın adresini yazıyoruz)
-        break; //Ve while dan çıkıyoruz
+void limit_houses(House** houses_head, int criter_name, int min, int max, int * new_lenght){
+  int counter = 0;
+  if(*houses_head != NULL) {
+    House * head = *houses_head;
+    House * keep;
+    while (head->nextHouse != NULL) {
+      if((min == NON || ghc_i(head, criter_name) >= min) && (max == NON || ghc_i(head, criter_name) <= max)) {
+        
+        if(counter == 0) {
+          *houses_head = head;
+          keep = head;
+        } else {
+          keep->nextHouse = head;
+          keep = head;
+        }
+        counter++;
       }
+      head = head->nextHouse;
     }
-  }
-
-  if(max != NON) { //Eğer maksimum değer yok denilmemişse
-    while (tmp->nextHouse != NULL) { //Liste bitena kadar gez diyoruz
-      if(ghc_i(tmp->nextHouse, criter_name) <= max) { //Her elemanın bir sonraki elemanını maksimumla karşılaştırıyoruz, yukarda kaldığımız yerden devam ediyoruz
-        tmp = tmp->nextHouse; //Eğer sonraki eleman maksimumdan küçük veya eşitse sonraki elemana geçiyoruz
-      } else {
-        tmp->nextHouse = NULL; //Eğer sonraki eleman maksimumdan büyükse elimizdeki elemanın sonrasını NULL yaparak onu son eleman haline getiriyoruz
-      }
+    if (counter > 0) {
+      keep->nextHouse = NULL;
+    } else {
+      *houses_head = NULL;
     }
+    *new_lenght = counter;
   }
 }
 
@@ -440,131 +499,77 @@ char * ghc_s (House * house, int criter_name) {
     }
 }
 
-void mean_sale_prices(House* houses_head, int criter_name, int criter_data){
-  //Lotarea ve Yearbuilt için
-  int price_sum = 0;
-  int avg_sum = 0;
-  int keeper = 0;
+void mean_sale_prices (House * ht[], int criter) {
 
-  //Diğerleri için
-  int counter = 0;
-  int tmp_i = 0;
-  int tmp_i_old = 0;
-  char tmp_c[15];
-  char tmp_c_old[15];
-
-  FILE * fp = fopen("mean_sale_prices_results.txt", "w");
-  sort_houses(&houses_head, criter_name, ASC);
-
-  switch (criter_name)
-    {
-    case LOTAREA:
-      keeper = houses_head->lotarea;
-      printf("\033[1;31m"); //Kırmızı bastırmak için
-      printf("\n%-25s%-25s%-25s%-25s%-25s\n", "Min Lotarea", "Max Lotarea", "Ev Sayısı", "Ortalama Lotarea", "Ortalama Fiyat");
-      printf("\033[0m"); //Standart renkte bastırmak için
-      break;
-    case STREET:
-    
-      break;
-    case NEIGHBORHOOD:
+  if( criter == NEIGHBORHOOD) {
+    House * tmp;
+    int sum, count, color;
+    sum = color = count;
+    printf(CYAN"\n\n%-20s%-15s%-15s", "Kriter Degeri", "Ev Sayisi", "Ortalama Fiyat");
+    for(int i = 0; i < HASH_TABLE_SIZE_TYPE_NEIGHBOR; i++) {
       
-      break;
-    case YEARBUILT:
-      keeper = houses_head->yearbuilt;
-      break;
-    case OVERALLQUAL:
-      
-      break;
-    
-      break;
-    case KITCHENQUAL:
-      
-      break;
-    
-    default:
-      break;
-    }
-
-  while (houses_head->nextHouse != NULL) {
-    switch (criter_name)
-    {
-    case LOTAREA:
-    /*
-    berkay-yildiz:
-    Burada sonuçlarda anlamadığım şekilde hata var. Ortalama değerler çok anlamsız çıkıyor, neden olduğunu bulamadım.
-    */
-      tmp_i = houses_head->lotarea;
-      if(tmp_i - keeper > criter_data) {
-        printf("%-25d%-25d%-25d%-25d%-25d\n", keeper, tmp_i_old, counter, (avg_sum/counter), (price_sum/counter-1));
-        price_sum = avg_sum = counter = 0;
-        keeper = tmp_i;
+      if( ht[i] != NULL) {
+        tmp = ht[i];
+        while(tmp != NULL) {
+          sum += ghc_i(tmp, SALEPRICE);
+          count++;
+          tmp = tmp->nextHouseByNeighbor;
+        }
+        if (color%2 == 0) {
+          printf(GREEN "\n%-20s%-15d%-15d", ht[i]->neighborhood, count, sum/count);
+        } else {
+          printf(BLUE "\n%-20s%-15d%-15d", ht[i]->neighborhood, count, sum/count);
+        }
+        color++;
       }
-      price_sum += houses_head->saleprice;
-      avg_sum += tmp_i;
-      counter++;
-      tmp_i_old = tmp_i;
-      break;
-    case STREET:
-    printf("aka_street\n");
-      strcpy(tmp_c_old, tmp_c);
-      strcpy(tmp_c, houses_head->street);
-      if(strcmp(tmp_c, tmp_c_old)) {
-        printf("%s | %d\n", tmp_c_old, counter);
-        counter = 1;
-      } else counter ++;
-      break;
-    case NEIGHBORHOOD:
-      strcpy(tmp_c_old, tmp_c);
-      strcpy(tmp_c, houses_head->neighborhood);
-      if(strcmp(tmp_c, tmp_c_old)) {
-        printf("%s | %d\n", tmp_c_old, counter);
-        counter = 1;
-      } else counter ++;
-
-      break;
-    case YEARBUILT:
-      if(houses_head->yearbuilt - keeper > criter_data) {
-        printf("%d | %d\n", (avg_sum/counter), (price_sum/counter));
-        price_sum = avg_sum = counter = 0;
-        keeper = houses_head->yearbuilt;
-      }
-      price_sum += houses_head->saleprice;
-      avg_sum += houses_head->yearbuilt;
-      counter++;
-      break;
-    case OVERALLQUAL:
-      tmp_i_old = tmp_i;
-      tmp_i = houses_head->overallqual;
-      if(tmp_i != tmp_i_old) {
-        printf("%d | %d\n", tmp_i_old, counter);
-        counter = 1;
-      } else counter ++;
-
-      break;
-    case OVERALLCOND:
-      tmp_i_old = tmp_i;
-      tmp_i = houses_head->overallcond;
-      if(tmp_i != tmp_i_old) {
-        printf("%d | %d\n", tmp_i_old, counter);
-        counter = 1;
-      } else counter ++;
-      break;
-    case KITCHENQUAL:
-      tmp_i_old = tmp_i;
-      tmp_i = houses_head->kitchenqual;
-      if(tmp_i != tmp_i_old) {
-        printf("%d | %d\n", tmp_i_old, counter);
-        counter = 1;
-      } else counter ++;
-      break;
-    
-    default:
-    printf("hatali giris");
-      break;
+      
     }
-    counter++;
-    houses_head = houses_head->nextHouse;
+  } else {
+    House * tmp;
+    int sum, count, l, color;
+    sum = count = l = color = 0;
+    tmp = linearise_hash_table(ht, ID, &l);
+    sort_houses(&tmp, criter, ASC);
+    printf(CYAN"\n\n%-20s%-15s%-15s", "Kriter Degeri", "Ev Sayisi", "Ortalama Fiyat");
+    for (int i = 0; i < l-1; i++) {
+      sum += tmp->saleprice;
+      count++;
+      if ( (criter == NEIGHBORHOOD || criter == STREET) ? strcmp(ghc_s(tmp, criter), ghc_s(tmp->nextHouse, criter)) : ghc_i(tmp, criter) != ghc_i(tmp->nextHouse, criter)) {
+        if (criter == NEIGHBORHOOD || criter == STREET) {
+          if (color%2 == 0) {
+            printf(GREEN "\n%-20s%-15d%-15d", ghc_s(tmp, criter), count, sum/count);
+          } else {
+            printf(BLUE "\n%-20s%-15d%-15d", ghc_s(tmp, criter), count, sum/count);
+          }
+          color++;
+        }else {
+          if (color%2 == 0) {
+            printf(GREEN "\n%-20d%-15d%-15d", ghc_i(tmp, criter), count, sum/count);
+          } else {
+            printf(BLUE "\n%-20d%-15d%-15d", ghc_i(tmp, criter), count, sum/count);
+          }
+          color++;
+        }        
+        sum = 0;
+        count = 0;
+      }
+      tmp = tmp->nextHouse;
+    }
+    if (count > 0 && (criter == NEIGHBORHOOD || criter == STREET)) {
+      if (color%2 == 0) {
+        printf(GREEN "\n%-20s%-15d%-15d", ghc_s(tmp, criter), count, sum/count);
+      } else {
+        printf(BLUE "\n%-20s%-15d%-15d", ghc_s(tmp, criter), count, sum/count);
+      }
+      color++;
+    }else if (count > 0) {
+      if (color%2 == 0) {
+        printf(GREEN "\n%-20d%-15d%-15d", ghc_i(tmp, criter), count, sum/count);
+      } else {
+        printf(BLUE "\n%-20d%-15d%-15d", ghc_i(tmp, criter), count, sum/count);
+      }
+      color++;
+    }
   }
 }
 

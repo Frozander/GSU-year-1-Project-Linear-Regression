@@ -37,8 +37,17 @@
 #define TEST 1
 #define TRAIN 0
 
-//operators
+#define HASH_TABLE_SIZE 100
+#define HASH_TABLE_SIZE_TYPE_NEIGHBOR ('Z' - 'A') * 2
+#define LINE_BUFFER_SIZE 1024
 
+#define RESET   "\x1b[0m"
+#define BLUE    "\x1b[94m"
+#define CYAN    "\x1b[96m" 
+#define RED     "\x1b[91m"
+#define GREEN   "\x1b[92m" 
+#define MAGENTA "\x1b[95m"
+#define YELLOW  "\x1b[93m"
 
 /*
  * Ornek ev veri yapisi
@@ -62,12 +71,12 @@ typedef struct house{
   struct house * nextHouseByNeighbor;
 } House;
 
-House * linearise_hash_table (House * ht[], int hash_type);
+House* linearise_hash_table (House * ht[], int hash_type, int * lenght);
 void create_hash_table(House * house_list_head, House * houses[], int hash_type);
-House* get_neighborhoods(House * house, House * houses[]);
+House* get_neighborhoods(House * house, House * houses[], int * lenght);
 void print_house(House * house, int style, int limit);
 House* get_house_byid(int id, House * houses[]);
-void mean_sale_prices(House* houses_head, int criter_name, int criter_data);
+void mean_sale_prices (House * ht[], int criter);
 void sort_houses(House** houses, int criter_name, int order);
 void create_hash_table_tree(House * houses[], int hash_type);
 int convert_kitchenqual (char * c);
@@ -82,7 +91,8 @@ int ghc_i (House * house, int criter_name);
 House * ghc_p (House * house, int criter_name);
 House* limit_list(House* houses_head, int criter_name, int min, int max);
 void read_house_data(char* filename, House * hById[], House * hByN[], int file_type);
-void limit_houses(House** houses_head, int criter_name, int min, int max);
+void limit_houses(House** houses_head, int criter_name, int min, int max, int * new_lenght);
 int get_criter_avg(House* head, int criter);
 int get_list_lenght (House * head);
+void write_house_to_file(House* head, char* filename, int limit);
 #endif
