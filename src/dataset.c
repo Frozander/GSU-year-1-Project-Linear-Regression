@@ -94,40 +94,39 @@ void place_house (House * house, House * houses[], int hash_type) {
 }
 
 
-//Csv dosyalarındaki evlerin verisini okuma fonksyonu
-void read_house_data(char* filename, House * hById[], House * hByN[], int file_type){
+//Csv dosyalarındaki evlerin verisini okuma fonksyonu, okunduysa bir okunamadiysa sifir dondurur
+int read_house_from_file(char* filename, House * hById[], House * hByN[], int file_type){
   char buffer[LINE_BUFFER_SIZE];
   House * tmp;
   
   FILE *fp = fopen( filename, "r"); //dosyayı okumak için açıyoruz
 
-  if (file_type == TRAIN || file_type == TEST) { //train açılmış demektir
+  if (fp != NULL) { //train açılmış demektir
 
-    fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup atlıyoruz
+    fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup veri dosyasini teyit ediyoruz
 
-    while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
-      fgets(buffer, LINE_BUFFER_SIZE, fp); 
-      if(buffer[0] != '\0'){
-        tmp = write_house(buffer, file_type);
-        place_house(tmp, hById, ID);
-        place_house(tmp, hByN, NEIGHBORHOOD);
+    if (!strcmp( buffer, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual\n") || !strcmp( buffer, "Id,LotArea,Street,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual\n")) {
+      while(!feof(fp)){ //dosyanın sonuna kadar okuma yapar
+        fgets(buffer, LINE_BUFFER_SIZE, fp); 
+        if(buffer[0] != '\0'){
+          tmp = write_house(buffer, file_type);
+          place_house(tmp, hById, ID);
+          place_house(tmp, hByN, NEIGHBORHOOD);
+        }
+        strcpy(buffer, "");
       }
-      strcpy(buffer, "");
+      fclose(fp);
+      return 1;
+    } else {
+      printf("bnkl0");
+      fclose(fp);
+      return 0;
     }
-
-    /* berkay-yildiz:
-      Burada fscanf yerine fgets tercih etme sebebim fscanf in dosya sonu konusunda sıkıntı çıkarabilmesiydi,
-        fgets direk satırı okuduğu için daha iyi bir yol.
-      Keza genel olarak formatlı okuma stringleri pointerla eriştiğimiz alana yazmakta sorun çıkartıyordu,
-        bunu strcpy ile yapmak daha sağlıklı olacağından fgets ile aldığım veriyi başka bir fonksyonda
-        string ayıklama yaparak işledim. Bu şekilde daha çok kontrol olanağı oluyor ve hatalardan kaçınıyoruz.
-     */
-
+    
   } else {
-    printf ("dosya tipi hatasi");
+    fclose(fp);
+    return 0;
   }
-  
-  fclose(fp);
 }
 
 
@@ -270,7 +269,7 @@ void print_house(House * house, int style, int limit){
 void write_house_to_file(House* head, char* filename, int limit){
   FILE* stream = fopen(filename, "w");
 
-  fprintf(stream, "id,lotarea,street,saleprice,neighborhood,yearbuilt,overallqual,overallcond,kitchenqual\n");
+  fprintf(stream, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual\n");
   if (limit == LIMITLESS) {
     while (head != NULL)  {
       fprintf(stream,
@@ -381,51 +380,19 @@ void limit_houses(House** houses_head, int criter_name, int min, int max, int * 
   }
 }
 
-int get_criter_avg(House* head, int criter) {
+int get_criter_avg_of_house(House* head, int criter) {
+  int sum, counter;
+  sum = counter = 0;
 
-  int sum = 0;
-  int counter = 0;
-  while (head->nextHouse != NULL) {
+  while (head != NULL) {
     sum += ghc_i(head, criter);
     head = head->nextHouse;
     counter++;
   }
-  if(counter != 0) {
-    return sum/counter;
-  } else {
-    printf("crtier hatasi");
-    return 0;
-  }
-  
+  if(counter != 0) return sum/counter; else return 0;
 }
 
-int get_list_lenght (House * head) {
-  if (head != NULL) {
-    int counter = 1;
-    while(head->nextHouse != NULL) {
-      counter++;
-      head = head->nextHouse;
-    }
-    return counter;
-  }else {
-    printf("head = NULL");
-    return 0;
-  }
-  
-}
-
-int ghc_i_avg (House * house, int * criter_names) {
-  int sum = 0;
-  int counter = 0;
-  while (counter < sizeof(criter_names) ) {
-    sum += ghc_i(house, criter_names[counter]);  
-    counter++;
-  }
-
-  return sum/counter;
-}
-
-//integer değerinde ev verisi döndürür
+//integer tipinde ev kriteri döndürür
 int ghc_i (House * house, int criter_name) {
   switch (criter_name)
     {
@@ -456,11 +423,15 @@ int ghc_i (House * house, int criter_name) {
     case NEIGHBORHOOD:
       return *(house->neighborhood);
       break;
+    case QUALTHREE:
+      return ((house->kitchenqual  + house->overallqual + house->overallcond) / 3);
+      break;
     default:
       break;
     }
 }
 
+//pointer tipinte ev kriteri döndürür
 House * ghc_p (House * house, int criter_name) {
   switch (criter_name)
   {
@@ -484,7 +455,7 @@ House * ghc_p (House * house, int criter_name) {
   }
 }
 
-//string cinsinde ev verisi döndürür
+//string tipinde ev kriteri döndürür
 char * ghc_s (House * house, int criter_name) {
   switch (criter_name)
     {

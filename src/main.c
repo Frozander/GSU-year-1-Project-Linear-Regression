@@ -1,14 +1,16 @@
 #include"dataset.h"
 #include"models.h"
 
+//Ön tanımlı dosya yolları
 #define CSV_TEST_PREDEFINED "../data/data_test.csv"
 #define CSV_TRAIN_PREDEFINED "../data/data_train.csv"
-#define CSV_LINEER_OUT_PREDEFINED "../out/lineer_out.csv"
-#define CSV_RELATIONAL_OUT_PREDEFINED "../out/relational_out.csv"
+#define CSV_LINEER_OUT_PREDEFINED "../out/lineer_predictions_out.csv"
+#define CSV_RELATIONAL_OUT_PREDEFINED "../out/relational_predictions_out.csv"
 #define CSV_FILTERED_TEST_OUT_PREDEFINED "../out/filtered_test_data_out.csv"
 #define CSV_FILTERED_TRAIN_OUT_PREDEFINED "../out/filtered_train_data_out.csv"
 #define CSV_LIST_NEIGHBORS_OUT_PREDEFINED "../out/list_neighbors_out.csv"
 
+//Ana Menüler
 #define ANA_MENU 0
 #define KRITERE_GORE_LISTELE 1
 #define ID_VERILEN_EVI_BUL 2
@@ -17,6 +19,7 @@
 #define FIYAT_TAHMINI_YAP 5
 #define GELISTIRICI_SECENEKLERI 6
 
+//Alt Menüler
 #define EXIT -1
 #define ID_AL 1
 #define BASILACAK_SAYISI_BELIRLE 2
@@ -38,14 +41,15 @@
 
 #define LINE 100
 
-
-
+//Okuma yazma manüplasyon ve kontrol fonksyonları
 void slice_str(char * str, char * buffer, int start, int end);
 int check_extention (char * c, char * ext);
 int check_csv(char * c);
 int r_int ();
 char r_char ();
 
+
+//Gerekli global değişkenler
 char csv_test_data_directory[LINE];
 char csv_train_data_directory[LINE];
 char csv_out_directory[LINE];
@@ -56,8 +60,6 @@ House* housesByNeighbor[HASH_TABLE_SIZE];
 House* housesById_test[HASH_TABLE_SIZE];
 House* housesByNeighbor_test[HASH_TABLE_SIZE];
 
-//For printing the sorted list to output
-
 int main(int argc,char * argv[]){
 
   //on tanimli degerler ataniyor
@@ -67,11 +69,12 @@ int main(int argc,char * argv[]){
   printf("\x1B[2J"); //konsol ekrani temizleniyor
 
   //main icinde kullanilan degiskenler tanimlaniyor
-  int menu, sub_menu, mini_menu, min, max, kriter, basilacak_sayisi, verinin_bulundugu_grup, kullanilacak_veri, goruntuleme_bicimi, yontem, id, tahmin, list_lenght, sayac = 0;
+  int menu, sub_menu, mini_menu, min, max, kriter, basilacak_sayisi, verinin_bulundugu_grup, kullanilacak_veri, goruntuleme_bicimi, yontem, id, tahmin, list_lenght, sayac, tutucu;
   char min_c, max_c = 0;
   House * house_p, * house_p_2;
   Matrix * matrix_p, * matrix_p_2;
 
+  //csv belgele adresleri dogru alinmismi kontrol
   if(argc < 2 || argv[1] == NULL) {
     printf(CYAN "\nOgrenme verisi program cagirilirken arguman olarak girilmemis, ne yapmak istersiniz?\n\n");
     printf(BLUE "1 - On tanimli belge adresini kullan (%s)\n", CSV_TRAIN_PREDEFINED);
@@ -139,11 +142,18 @@ int main(int argc,char * argv[]){
     printf(GREEN "\n\nTest verisi arguman olarak alindi : " CYAN "%s\n\n" RESET, csv_test_data_directory);
   }
 
-  //Ev verilerinin belgelerden okunmasi
-  read_house_data(csv_train_data_directory, housesById, housesByNeighbor, TRAIN);
-  read_house_data(csv_test_data_directory, housesById_test, housesByNeighbor_test, TEST);
-  
   menu = ANA_MENU;
+
+  //Ev verilerinin belgelerden okunmasi
+  if (!read_house_from_file(csv_train_data_directory, housesById, housesByNeighbor, TRAIN)) {
+    printf(RED "\nDosya Okuma Hatasi\n" RESET);
+    menu = EXIT;
+  }
+
+  if (!read_house_from_file(csv_test_data_directory, housesById_test, housesByNeighbor_test, TEST)) {
+    printf(RED "\nDosya Okuma Hatasi\n" RESET);
+    menu = EXIT;
+  }
   
   while(menu != EXIT){
     
@@ -154,7 +164,7 @@ int main(int argc,char * argv[]){
       printf(BLUE "2 - ID degeri verilen evi bastir " MAGENTA " (ekrana bas)\n");
       printf(BLUE "3 - ID degeri verilen evin komsu evlerini listele " MAGENTA " (ekrana bas / dosyaya kaydet)\n");
       printf(BLUE "4 - Kritere gore ortalama fiyatlari gruplandirarak goster " MAGENTA " (ekrana bas)\n");
-      printf(BLUE "5 - Fiyat tahmini yap\n");
+      printf(BLUE "5 - Fiyat tahmini yap" MAGENTA " (ekrana bas [kismi] / dosyaya kaydet) (\n");
       printf(BLUE "6 - Gelistirici Secenekleri\n");
       printf(RED "0 - Programi kapat\n");
       printf(MAGENTA "\nSeciminiz: " RESET);
@@ -639,24 +649,42 @@ int main(int argc,char * argv[]){
           house_p = linearise_hash_table(housesById, ID, &list_lenght);
           house_p_2 = linearise_hash_table(housesById_test, ID, &list_lenght);
           sort_houses(&house_p, ID, ASC);
+          sort_houses(&house_p_2, ID, ASC);
           matrix_p = calculate_parameter(house_p);
-          printf(BLUE "\n\nTahmin dogrusunun XY duzlemi uzerinde gosterimi:\n" MAGENTA"  Y = %.2lfX + %.2lf" RESET, matrix_p->values[1][0], matrix_p->values[0][0]);
+          printf(BLUE "\nTahmin dogrusunun XY duzlemi uzerinde gosterimi: " MAGENTA"Y = %.2lfX + %.2lf\n\n" RESET, matrix_p->values[1][0], matrix_p->values[0][0]);
           Matrix* matrix_p_2 = make_prediction(&house_p_2, matrix_p);
-          matrix_to_house_list(matrix_p_2, &house_p_2);        
-          write_house_to_file (house_p_2, csv_out_directory, basilacak_sayisi);
-          printf(GREEN "\n%s dosyasina ev bilgileri yazildi\n" RESET, csv_out_directory);
-          sub_menu = TEKRAR_YAP_SOR;
+          matrix_to_house_list(matrix_p_2, &house_p_2); 
+          if ( goruntuleme_bicimi == EKRANA_BASTIR) {
+            print_house (house_p_2, MULTI, LIMITLESS);
+            printf(GREEN "\nSistemdeki ev fiyatlari bastirilan tahmin fiyatlari ile guncellendi\n" RESET);
+            sub_menu = TEKRAR_YAP_SOR;
+          } else if ( goruntuleme_bicimi == DOSYAYA_YAZDIR) {
+            write_house_to_file (house_p_2, csv_out_directory, LIMITLESS);
+            printf(GREEN "\n%s dosyasina ev bilgileri yazildi, sistemdeki ev fiyatlari tahmin fiyatlari ile guncellendi\n" RESET, csv_out_directory);
+            sub_menu = TEKRAR_YAP_SOR;
+          } else {
+            printf(RED "\nHATA : Sonuc goruntuleme bicimi eksigi hatasi - Ana menuye donuluyor\n" RESET);
+            sub_menu = EXIT;
+            menu = ANA_MENU;
+          }
         } else if ( sub_menu == BENZERLIK_YONTEMI ) {
           if(kullanilacak_veri == ID) {
             house_p = get_house_byid(id, (verinin_bulundugu_grup == TEST) ? housesById_test : housesById);
             tahmin = model_by_similarity(housesByNeighbor,  house_p);
-            if(goruntuleme_bicimi == EKRANA_BASTIR) {
+            if(tahmin == 0) {
+              printf(RED "\nId si verilen ev bulunamadi veya tahmin gerceklestirilirken sorunla karsilasildi\n" RESET);
+              sub_menu = TEKRAR_YAP_SOR;
+            }
+            else if(goruntuleme_bicimi == EKRANA_BASTIR) {
               print_house (house_p, SINGLE_WITH_TOP, LIMITLESS);
               printf (CYAN "\nTahmin fiyati %d \n" RESET, tahmin);
               sub_menu = TEKRAR_YAP_SOR;
             } else if (goruntuleme_bicimi == DOSYAYA_YAZDIR) {
-              write_house_to_file (house_p, csv_out_directory, basilacak_sayisi);
-              printf(GREEN "\n%s dosyasina ev bilgileri yazildi\n" RESET, csv_out_directory);
+              tutucu = house_p->saleprice;
+              house_p->saleprice = tahmin;
+              write_house_to_file (house_p, csv_out_directory, LIMITLESS);
+              printf(GREEN "\n%s dosyasina ev tahmin edilen fiyat bilgisi ile yazildi, sistemde kayitli fiyat guncellenmedi\n" RESET, csv_out_directory);
+              house_p->saleprice = tutucu;
               sub_menu = TEKRAR_YAP_SOR;
             } else {
               printf(RED "\nHATA : Sonuc goruntuleme bicimi eksigi hatasi - Ana menuye donuluyor\n" RESET);
@@ -665,15 +693,15 @@ int main(int argc,char * argv[]){
             }
           } else if (kullanilacak_veri == TEST_VERISI) {
             house_p = linearise_hash_table(housesById_test, ID, &list_lenght);
+            sort_houses (&house_p, ID, ASC); //opsyonel
             house_p_2 = house_p;
-            for (int i = 0; i < list_lenght; i++) {
-              house_p_2 = get_house_byid(id, (verinin_bulundugu_grup == TEST) ? housesById_test : housesById);
-              house_p_2->saleprice = model_by_similarity(housesByNeighbor,  house_p);
+            for(int i = 0; i < list_lenght; i++) {
+              house_p_2->saleprice = model_by_similarity(housesByNeighbor, house_p_2);
               house_p_2 = house_p_2->nextHouse;
             }
             if(goruntuleme_bicimi == DOSYAYA_YAZDIR) {
-              write_house_to_file(house_p, csv_out_directory, basilacak_sayisi);
-              printf(GREEN "\n%s dosyasina ev bilgileri yazildi\n" RESET, csv_out_directory);
+              write_house_to_file(house_p, csv_out_directory, LIMITLESS);
+              printf(GREEN "\n%s dosyasina ev bilgileri yazildi, sistemdeki ev fiyatlari tahmin fiyatlari ile guncellendi\n" RESET, csv_out_directory);
               sub_menu = TEKRAR_YAP_SOR;
             } else if(goruntuleme_bicimi == EKRANA_BASTIR) {
               print_house (house_p, MULTI, LIMITLESS);
@@ -731,7 +759,7 @@ int r_int () {
   return read;  
 }
 
-//char okur (sadece a-Z arasini)
+//char okur (sadece A-Z arasini)
 char r_char () {
   char read;
   scanf("%*[^A-Z] %c",&read);
@@ -739,7 +767,8 @@ char r_char () {
 }
 
 int check_csv  (char * c) {
-  return check_extention (c, ".csv");
+  char ext [3] = "csv";
+  return check_extention (c, ext);
 }
 
 int check_extention (char * c, char * ext) {

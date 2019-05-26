@@ -2,48 +2,33 @@
 #include"dataset.h"
 #include<stdio.h>
 
-House * model_by_similarity_list (House * houses [], House  * house) {
-  
-}
-
-
 int model_by_similarity(House * houses [], House  * house) {
-  House * head;
-  int avg;
-  int gap;
-  int lenght;
-  head = get_neighborhoods(house, houses, &lenght);
-  printf("\nKomsular alindi\nKomsu sayisi: %d\n", lenght);
+  if ( house != NULL)  {
+    House * head;
+    int avg;
+    int gap;
+    int l;
+    head = get_neighborhoods(house, houses, &l);
+    if ( l > 10) {
+      gap = 2000;
+      limit_houses(&head, LOTAREA, (house->lotarea - gap), (house->lotarea + gap), &l);
 
-  gap = 2000;
-  limit_houses(&head, LOTAREA, (house->lotarea - gap), (house->lotarea + gap), &lenght);
-  printf("\nLotarea ya göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
+      if ( l > 10) {
+        gap = 8;
+        limit_houses(&head, YEARBUILT, (house->yearbuilt - gap), (house->yearbuilt + gap), &l);
 
-  gap = 5;
-  limit_houses(&head, YEARBUILT, (house->yearbuilt - gap), (house->yearbuilt + gap), &lenght);
-  printf("\nYearbuilt e göre limitlendi\nEv sayisi: %d\n", get_list_lenght(head));
+        if ( l > 10 ) {
+          gap = 5;
+          limit_houses(&head, QUALTHREE, (ghc_i(house, QUALTHREE) - gap), (ghc_i(house, QUALTHREE) + gap), &l);
+        }
+      } 
+    }
 
-  return get_criter_avg(head, SALEPRICE);
+    return get_criter_avg_of_house(head, SALEPRICE);
+  } else {
+    return 0;
+  }
 }
-
-
-
-  //TODO
-
-  // 1 - Oncelikle ayni komsuluktaki evleri bulun
-  // 2 - Bu evleri lotArea ya gore siralayin
-  // 3 - new_house degiskenin lotarea parametresine en
-  //  yakin evleri alin, bu evlerin alanlari 
-  //  (new_house.lotarea+2000) ve (new_house.lotarea-2000) metrekare arasinda
-  //   olabilir.
-  // 4 - Kalan evleri yillarina gore siralayin
-  // 5 - new_house degiskenin yearbuilt parametresine en yakin
-  // evleri secin, bu evlerin yapim tarihleri
-  //  (new_house.yearbuilt+5) ve (new_house-5) arasinda olabilir.
-  // 6 - Ek olarak kaliteye gore secim yapabilirsiniz.
-  // 7 - Son elemeden sonra elinizde kalan evlerin fiyat ortalamasini alin
-  // 8 - Yeni gelen ev icin fiyat degeri bu ortalama olmalidir.
-
 
 Matrix* create_matrix(int line, int collumn){
   // Yeni bir iki boyutlu array (Matrix) oluşturulur
@@ -183,15 +168,6 @@ Matrix* calculate_parameter(House* houses){
 
 Matrix* make_prediction(House** house_in,Matrix* W){
   Matrix* predicted_prices;
-  // TODO
-  // 1 - filename olarak verilen test verisini oku,
-  //   yeni houses dizisi olustur
-  // 2 - create_data_matrices kullanarak X ve y matrislerini olustur
-  // 3 - Daha onceden hesaplanan W parametresini kullanarak
-  //  fiyat tahmini yap, burda yapilmasi gereken
-  //  X ve W matrislerinin carpimini bulmak
-  // 4 - Sonuclari bir dosyaya yaz
-  //print_house(linear_houses, MULTI, 0);
   House* tmp = *house_in;
   int counter = 0;
   House* cur = *house_in;

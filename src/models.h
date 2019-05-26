@@ -6,14 +6,12 @@
 #ifndef MODELS
 #define MODELS
 
-
-// Gerekli veri tanimlarini burada yapabilirsiniz
 typedef struct matrix
 {
-    // Lines and collumns for the matrix
+    // Matriksin sütun ve satırları
     int lines;
     int columns;
-    // Two dimensional array for values
+    // Dğerler için iki boyutlu dizi
     double** values;
 } Matrix;
 
