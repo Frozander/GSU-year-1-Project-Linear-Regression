@@ -613,12 +613,13 @@ char * convert_kitchenqual_back (int value) {
 House* merge(House* in1, House* in2, int criter_name, int order){
   House* res = NULL;
 
+  // Eğer soldaki liste boşsa sağdakini, sağdaki boşsa soldakini döndürür
   if (in1 == NULL) 
       return (in2); 
   else if (in2 == NULL) 
       return (in1);
 
-  if (order == ASC)
+  if (order == ASC) // Artan büyüklüğe göre sıralama
     {
       if (ghc_i(in1, criter_name) <= ghc_i(in2, criter_name))
         {
@@ -630,7 +631,7 @@ House* merge(House* in1, House* in2, int criter_name, int order){
           res->nextHouse = merge(in1, in2->nextHouse, criter_name, order);
         }
         return (res);
-    } else if (order == DESC)
+    } else if (order == DESC) // Azalan büyüklüğe göre sıralama
     {
       if (ghc_i(in1, criter_name) >= ghc_i(in2, criter_name))
         {

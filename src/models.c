@@ -52,6 +52,8 @@ Matrix* create_matrix(int line, int collumn){
 }
 
 void free_matrix(Matrix* matrix_in){
+  // Matris'in içinde iki boyutlu dinamik bir dizi olduğu için free() tek başına kullanılamaz
+  // Bu sebeple her satırın tek tek free() edilmesi lazım
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
     free(matrix_in->values[i]);
@@ -60,6 +62,7 @@ void free_matrix(Matrix* matrix_in){
 }
 
 void print_matrix(Matrix* matrix_in){
+  //Basit matris bastırma fonksiyonu, test amaçlı
   printf("Matris Basiliyor\n");
   for (size_t i = 0; i < matrix_in->lines; i++)
   {
@@ -72,20 +75,26 @@ void print_matrix(Matrix* matrix_in){
 }
 
 void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
-  House* tmp = *houses;
+  // Ev sayısını tutacak olan sayaç
   int counter = 0;
+  // Biri sayım biri de verileri yazmak için kullanılacak iki adet cursor pointer
+  House* tmp = *houses;
   House* cur = *houses;
+  // Evlerin sayısı bulunur
   while (cur!=NULL)
   {
     cur= cur->nextHouse;
     counter++;
   }
+
+  // X ve Y matrisleri oluşrutulur
   Matrix* X_tmp = create_matrix(counter, 2);
   Matrix* Y_tmp = create_matrix(counter, 1);
+
+  // Her iki matrise de tüm değerler tek döngüde yazılır
   int k = 0;
   while (tmp != NULL)
   {
-    //printf("\n%d %d", tmp->lotarea, tmp->saleprice);
     X_tmp->values[k][0] = 1;
     X_tmp->values[k][1] = tmp->lotarea;
     
@@ -103,6 +112,7 @@ void create_data_matrices(House** houses,Matrix** X,Matrix** Y){
 
 Matrix* get_transpose(Matrix* A){
   Matrix* Atranspose;
+  // A'nın satır'ı sütun, sütun'u satır olacak şekilde yeni bir matris oluşturulur
   Atranspose = create_matrix(A->columns, A->lines);
   for (size_t i = 0; i < A->lines; i++)
   {
@@ -120,9 +130,12 @@ Matrix* get_inverse(Matrix* A){
     Inverse matrix sadece 2x2 fonksiyonlarda olduğu için
     onlara özel bir yöntem kullanılacak
     */
+  // 2x2'lik bir matris oluşrurulur
   Ainverse = create_matrix(2, 2);
-  // Calculate teh determinant of the function
+  // Fonksiyon determinantı bulunur
   double det = A->values[0][0] * A->values[1][1] - A->values[1][0] * A->values[0][1];
+
+  //Tersini alma işlemleri
   Ainverse->values[0][0] =  A->values[1][1] / det;
   Ainverse->values[1][0] = -1 * A->values[1][0] / det;
   Ainverse->values[0][1] = -1 *A->values[0][1] / det;
@@ -131,13 +144,18 @@ Matrix* get_inverse(Matrix* A){
 }
 
 Matrix* get_multiplication(Matrix* A, Matrix* B){
+  // Sonuç matris pointer'ı
   Matrix* C;
+
+  // A'nın satır ve B'nin sütun sayısı ile C matrisi oluşturulur
   C = create_matrix(A->lines, B->columns);
+
+  // Çarpım İşlemi
   for (size_t i = 0; i < C->lines; i++)
   {
     for (size_t j = 0; j < C->columns; j++)
     {
-      C->values[i][j] = 0;
+      C->values[i][j] = 0; // C matrisin her değeri satır * sütun'dan oluştuğu için sonuç toplanarak bulunur
       for (size_t k = 0; k < A->columns; k++)
       {
         C->values[i][j] += A->values[i][k] * B->values[k][j];
@@ -148,39 +166,64 @@ Matrix* get_multiplication(Matrix* A, Matrix* B){
 }
 
 Matrix* calculate_parameter(House* houses){
+  /*  Frozander
+   *  Diğer tüm fonksiyonları kullanarak tek fonksiyonda parametre matrisini döndüren fonksiyon.
+   * */
+
+  // Parametre matrisi
   Matrix* W;
+  // Iki veri matrisi
   Matrix* X;
   Matrix* Y;
+  // houses adresindeki listeyi kullanarak X ve Y yi lotarea ve saleprice
+  // değerleri ile doldurur
   create_data_matrices(&houses, &X, &Y);
+
+  // X'in transpozu X^t
   Matrix* X_transpose = get_transpose(X);
+  // X ve X^t, 2x2 kare bir matris elde etmek için çarpılır
   Matrix* tmp_matrix = get_multiplication(X_transpose, X);
+  // X^t ve Y çarpılır
   Matrix* tmp_matrix_2 = get_multiplication(X_transpose, Y);
+  // X ve X^t'nin çarpımının tersi alınır
   Matrix* tmp_matrix_inv = get_inverse(tmp_matrix);
+  // tmp_matrix_2 ve tmp_matrix_inv çarpılır ve W parametre matrisine yazılır
   W = get_multiplication(tmp_matrix_inv, tmp_matrix_2);
+
+  // Artık kullanılmayan matrisler 'free' edilir
   free_matrix(X_transpose);
   free_matrix(tmp_matrix);
   free_matrix(tmp_matrix_2);
   free_matrix(X);
   free_matrix(Y);
   free_matrix(tmp_matrix_inv);
+  // Parametre fonksiyonunu döndürür
   return W;
 }
 
 Matrix* make_prediction(House** house_in,Matrix* W){
+  // return edilecek matrix pointer'ı
   Matrix* predicted_prices;
+  // Iki adet house cursor'ı, biri boyut belirlemek için öbürü de matrise değer atamak için
   House* tmp = *house_in;
-  int counter = 0;
   House* cur = *house_in;
+  // Matris boyutu için gerekli sayaç
+  int counter = 0;
   
+  //Tüm linked list dönülerek kaç adet veri olduğu bulunur
   while (cur!=NULL)
   {
     counter++;
     cur = cur->nextHouse;
   }
-  
+
+  // Counter değeri * 2 boyutlu bir matris oluşturulur  
   Matrix* X= create_matrix(counter, 2);
+
+
   int k = 0;
   
+  //matris satır satır ilerlenerek house_in'deki lotarea verilerini alır
   while (tmp != NULL)
   {
     X->values[k][0] = 1;
@@ -189,28 +232,32 @@ Matrix* make_prediction(House** house_in,Matrix* W){
     k++;
   } 
   
+  // X matrisi ile önceden hesaplanan W matrisi çarpılır ve sonucu return edilecek matrise yazılır
   predicted_prices = get_multiplication(X, W);
+  // Kullanılmayan matris 'free' edilir
   free_matrix(X);
   
   return predicted_prices;
 }
 
 void matrix_to_house_list(Matrix* matrix_in, House** house_out){
-  //Error handling
-  if (matrix_in->columns != 1)
+  // HATA KONTROLU
+  if (matrix_in->columns != 1) // Eğer matriste birden fazla sütun varsa doğru matris değil
   {
     printf("\nFinal matrisi degil!");
     return;
   }
-  if (house_out == NULL)
+  if (house_out == NULL) // Ev listesi boşsa veri yazılamaz
   {
     printf("\nCikti listesi bos!");
     return;
   }
 
+  // Yazılacak evleri gösteren cursor pointer'ı eklendi
   House* cursor = *house_out;
   int i = 0;
 
+  // Tüm listeyi dönerken saleprice değerine matristeki verileri doldurur
   while (cursor != NULL)
   {
     cursor->saleprice = matrix_in->values[i][0];
