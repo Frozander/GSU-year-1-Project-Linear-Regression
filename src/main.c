@@ -9,6 +9,7 @@
 #define CSV_FILTERED_TEST_OUT_PREDEFINED "../out/filtered_test_data_out.csv"
 #define CSV_FILTERED_TRAIN_OUT_PREDEFINED "../out/filtered_train_data_out.csv"
 #define CSV_LIST_NEIGHBORS_OUT_PREDEFINED "../out/list_neighbors_out.csv"
+#define CSV_DEVELOPER_PREDEFINED "../out/developer.csv"
 
 //Ana Menüler
 #define ANA_MENU 0
@@ -59,6 +60,10 @@ House* housesByNeighbor[HASH_TABLE_SIZE];
 
 House* housesById_test[HASH_TABLE_SIZE];
 House* housesByNeighbor_test[HASH_TABLE_SIZE];
+
+House* ht_dev_id[HASH_TABLE_SIZE];
+House* ht_dev_ng[HASH_TABLE_SIZE_TYPE_NEIGHBOR];
+      
 
 int main(int argc,char * argv[]){
 
@@ -165,7 +170,7 @@ int main(int argc,char * argv[]){
       printf(BLUE "3 - ID degeri verilen evin komsu evlerini listele " MAGENTA " (ekrana bas / dosyaya kaydet)\n");
       printf(BLUE "4 - Kritere gore ortalama fiyatlari gruplandirarak goster " MAGENTA " (ekrana bas)\n");
       printf(BLUE "5 - Fiyat tahmini yap" MAGENTA " (ekrana bas [kismi] / dosyaya kaydet) (\n");
-      printf(BLUE "6 - Gelistirici Secenekleri\n");
+      printf(BLUE "6 - Fiyat Tahmini Bicimlerinin Karsilastirmasini Yap " MAGENTA"(bir kerede fazla calistirmayin)\n");
       printf(RED "0 - Programi kapat\n");
       printf(MAGENTA "\nSeciminiz: " RESET);
       menu = r_int();
@@ -737,9 +742,118 @@ int main(int argc,char * argv[]){
         }
       }
     } else if( menu == GELISTIRICI_SECENEKLERI){
-      int *ids, *prices;
-      mean_sale_prices(housesById, NEIGHBORHOOD);
+      
+      int l, l_2;
+
+      struct tahminler {
+        int id;
+        int asil_fiyat;
+        int matrix_fiyat;
+        int benzerlik_fiyat;
+        struct tahminler * next;
+      };
+
+      House * tmp_liste;
+      struct tahminler * tmp_tahmin;
+      
+      house_p = linearise_hash_table (housesById, TRAIN, &l);
+      write_house_to_file (house_p, CSV_DEVELOPER_PREDEFINED, LIMITLESS);
+      read_house_from_file (csv_train_data_directory, ht_dev_id, ht_dev_ng, TRAIN);
+      house_p_2 = linearise_hash_table (ht_dev_id, ID, &l_2);
+      sort_houses(&house_p_2, ID, ASC);
+      
+      
+      struct tahminler * t_arr;
+
+      tmp_tahmin = t_arr;
+      tmp_liste = house_p_2;
+      for (int i = 0; i < l && tmp_liste != NULL; i++) {
+        struct tahminler * new = malloc (sizeof(struct tahminler));
+        new->id = tmp_liste->id;
+        new->asil_fiyat = tmp_liste->saleprice;
+        if(i == 0) {
+          t_arr = new; 
+          tmp_tahmin = new;
+        } else {
+          tmp_tahmin->next = new;
+          tmp_tahmin = tmp_tahmin->next;
+        }
+        tmp_liste = tmp_liste->nextHouse;
+      }
+
+
+      sort_houses(&house_p, ID, ASC);
+      sort_houses(&house_p_2, ID, ASC);
+      matrix_p = calculate_parameter(house_p);
+      Matrix* matrix_p_2 = make_prediction(&house_p_2, matrix_p);
+      matrix_to_house_list(matrix_p_2, &house_p_2);
+      sort_houses(&house_p_2, ID, ASC);
+
+      tmp_liste = house_p_2;
+      tmp_tahmin = t_arr;
+      for (int i = 0; i < l && tmp_liste != NULL; i++) {
+        tmp_tahmin->matrix_fiyat = tmp_liste->saleprice;
+        tmp_liste = tmp_liste->nextHouse;
+        tmp_tahmin = tmp_tahmin->next;
+      }
+
+
+      
+      tmp_liste = house_p_2;
+      for(int i = 0; i < l; i++) {
+        tmp_liste->saleprice = model_by_similarity(housesByNeighbor, tmp_liste);
+        tmp_liste = tmp_liste->nextHouse;
+      }
+
+      sort_houses (&house_p_2, ID, ASC); //opsyonel
+
+      tmp_liste = house_p_2;
+      tmp_tahmin = t_arr;
+      for (int i = 0; i < l && tmp_liste != NULL; i++) {
+        tmp_tahmin->benzerlik_fiyat = tmp_liste->saleprice;
+        tmp_liste = tmp_liste->nextHouse;
+        tmp_tahmin = tmp_tahmin->next;
+      }
+
+      printf (GREEN "%-15s" BLUE "%-15s" MAGENTA "%-15s" CYAN "%-15s" YELLOW "%-15s"  BLUE "%-15s" MAGENTA "%-15s\n", "id", "asil fiyat", "matrix fiyat", "asil - matrix", "asil - benzer", "benzerlik", "matrix - benzerlik");
+
+      tmp_tahmin = t_arr;
+      int sum_matrix = 0;
+      int sum_benzerlik = 0;
+
+      int sum_matrix_igg = 0;
+      int sum_benzerlik_igg = 0;
+      
+      int count_igg = 0;
+
+      for (int i = 0; tmp_tahmin != NULL; i++) {
+        sum_matrix += abs(tmp_tahmin->asil_fiyat - tmp_tahmin->matrix_fiyat);
+        sum_benzerlik += abs(tmp_tahmin->asil_fiyat - tmp_tahmin->benzerlik_fiyat);
+
+        if (tmp_tahmin->asil_fiyat != tmp_tahmin->benzerlik_fiyat && tmp_tahmin->benzerlik_fiyat != 0) {
+          count_igg++;
+          sum_matrix_igg += abs(tmp_tahmin->asil_fiyat - tmp_tahmin->matrix_fiyat);
+          sum_benzerlik_igg += abs(tmp_tahmin->asil_fiyat - tmp_tahmin->benzerlik_fiyat);
+        }
+        printf (GREEN "%-15d" BLUE "%-15d" MAGENTA "%-15d" CYAN "%-15d" YELLOW "%-15d" BLUE "%-15d" MAGENTA "%-15d\n", tmp_tahmin->id, tmp_tahmin->asil_fiyat, tmp_tahmin->matrix_fiyat, tmp_tahmin->asil_fiyat - tmp_tahmin->matrix_fiyat, tmp_tahmin->asil_fiyat - tmp_tahmin->benzerlik_fiyat, tmp_tahmin->benzerlik_fiyat, tmp_tahmin->matrix_fiyat - tmp_tahmin->benzerlik_fiyat);
+        tmp_tahmin = tmp_tahmin->next;
+      }
+      printf (GREEN "%-15s" BLUE "%-15s" MAGENTA "%-15s" CYAN "%-15s" GREEN "%-15s"  BLUE "%-15s" MAGENTA "%-15s\n", "id", "asil fiyat", "matrix fiyat", "asil - matrix", "asil - benzer", "benzerlik", "matrix - benzerlik");
+      
+
+      printf(GREEN "\n\nBenzerlik ile sıfır çıkanlar dahil\n\n");
+      printf(GREEN "\nEv :" MAGENTA " %d\n", l);
+      printf(GREEN "\nBernzerlik :" MAGENTA " %d\n", sum_benzerlik);
+      printf(GREEN "\nMatrix :" MAGENTA " %d\n", sum_matrix);
+      printf(GREEN "\nFark :" MAGENTA " %d\n", sum_matrix - sum_benzerlik);
+
+      printf(GREEN "\n\nBenzerlik ile sıfır çıkanlar dahil edilmeden\n\n");
+      printf(GREEN "\nEv :" MAGENTA " %d\n", count_igg);
+      printf(GREEN "\nBernzerlik :" MAGENTA " %d\n", sum_benzerlik_igg);
+      printf(GREEN "\nMatrix :" MAGENTA " %d\n", sum_matrix_igg);
+      printf(GREEN "\nFark :" MAGENTA " %d\n", sum_matrix_igg - sum_benzerlik_igg);
       menu = ANA_MENU;
+
     } else {
       printf(RED "\nTanimsiz secim\n" RESET);
       menu = ANA_MENU; //tekrar sor
@@ -766,16 +880,17 @@ char r_char () {
   return read;
 }
 
+//csv check
 int check_csv  (char * c) {
-  char ext [3] = "csv";
+  char * ext = ".csv";
   return check_extention (c, ext);
 }
 
+//sadece 3 karakterli uzantilar icin check
 int check_extention (char * c, char * ext) {
-  int ext_lenght = strlen(ext);
-  char buffer[ext_lenght];
+  char buffer[4];
   int lenght = strlen(c);
-  slice_str(c, buffer, lenght - ext_lenght, lenght);
+  slice_str(c, buffer, lenght - 4, lenght);
   return (strcmp(buffer, ext) == 0) ? 1 : 0;
 }
 
