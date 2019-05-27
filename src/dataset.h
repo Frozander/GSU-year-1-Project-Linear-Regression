@@ -69,7 +69,6 @@ typedef struct house{
 } House;
 
 //Hash table
-void create_hash_table(House * house_list_head, House * houses[], int hash_type);
 House* linearise_hash_table (House * ht[], int hash_type, int * lenght);
 
 //Liste manülpasyonu
@@ -80,7 +79,6 @@ void sort_houses(House** houses, int criter_name, int order);
 void merge_sort(House ** list, int criter_name, int order);
 void split_list(House* input, House** first_half, House** second_half);
 House* merge(House* in1, House* in2, int criter_name, int order);
-House** pull_from_table_by_id_as_headref(int id, House* house_list[]);
 
 //Girdi - Çıktı
 void print_house(House * house, int style, int limit);

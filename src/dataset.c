@@ -18,33 +18,38 @@ int hash_code_n(char * n) {
 House * write_house(char * c, int file_type) {
   House * tmp_house = (House*) malloc(sizeof(House));
 
-  const char s[2] = ",";
-  char *token;
+  if ( tmp_house != NULL) { // hafızada alan açılabilmiş mi kontrol
 
-  token = strtok(c, s);
+    const char s[2] = ",";
+    char *token;
 
-  int i = 0;
-  while( token != NULL ) {
+    token = strtok(c, s);
 
-      if (i==0) tmp_house->id = atoi(token);
-      if (i==1) tmp_house->lotarea = atoi(token);
-      if (i==2) strncpy(tmp_house->street, token, sizeof(tmp_house->street));
-      if (i==3) {
-        if (file_type == TRAIN) tmp_house->saleprice = atoi(token);
-        else if (file_type == TEST) i = 4;
-      }
+    int i = 0;
+    while( token != NULL ) {
+
+        if (i==0) tmp_house->id = atoi(token);
+        if (i==1) tmp_house->lotarea = atoi(token);
+        if (i==2) strncpy(tmp_house->street, token, sizeof(tmp_house->street));
+        if (i==3) {
+          if (file_type == TRAIN) tmp_house->saleprice = atoi(token);
+          else if (file_type == TEST) i = 4;
+        }
+        
+        if (i==4) strncpy(tmp_house->neighborhood, token, sizeof(tmp_house->neighborhood));
+        if (i==5) tmp_house->yearbuilt = atoi(token);
+        if (i==6) tmp_house->overallqual = atoi(token);
+        if (i==7) tmp_house->overallcond = atoi(token);
+        if (i==8) tmp_house->kitchenqual = convert_kitchenqual(token);
       
-      if (i==4) strncpy(tmp_house->neighborhood, token, sizeof(tmp_house->neighborhood));
-      if (i==5) tmp_house->yearbuilt = atoi(token);
-      if (i==6) tmp_house->overallqual = atoi(token);
-      if (i==7) tmp_house->overallcond = atoi(token);
-      if (i==8) tmp_house->kitchenqual = convert_kitchenqual(token);
-    
-      token = strtok(NULL, s);
-      i++;
+        token = strtok(NULL, s);
+        i++;
+    }
+    return tmp_house;
+  } else {
+    printf(RED "\nHATA : Hafizada alan acarken sorunla karsilasildi\n" RESET);
+    return NULL;
   }
-
-  return tmp_house;
 }
 
 //Aldığı ev pointerını hash tableda uygun yere yerleştiren fonksyon
@@ -101,7 +106,7 @@ int read_house_from_file(char* filename, House * hById[], House * hByN[], int fi
   
   FILE *fp = fopen( filename, "r"); //dosyayı okumak için açıyoruz
 
-  if (fp != NULL) { //train açılmış demektir
+  if (fp != NULL) { //dosya açılmış mı kontrol ediyoruz
 
     fgets(buffer, LINE_BUFFER_SIZE, fp); //Veri olmayan ilk satırı okuyup veri dosyasini teyit ediyoruz
 
@@ -122,9 +127,9 @@ int read_house_from_file(char* filename, House * hById[], House * hByN[], int fi
       fclose(fp);
       return 0;
     }
-    
   } else {
     fclose(fp);
+    printf(RED "\nHATA : Yazilacak dosya acilamadi\n" RESET);
     return 0;
   }
 }
@@ -269,42 +274,47 @@ void print_house(House * house, int style, int limit){
 void write_house_to_file(House* head, char* filename, int limit){
   FILE* stream = fopen(filename, "w");
 
-  fprintf(stream, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual\n");
-  if (limit == LIMITLESS) {
-    while (head != NULL)  {
-      fprintf(stream,
-              "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
-              head->id,
-              head->lotarea,
-              head->street,
-              head->saleprice,
-              head->neighborhood,
-              head->yearbuilt,
-              head->overallqual,
-              head->overallcond,
-              convert_kitchenqual_back(head->kitchenqual)
-            );
-      head = head->nextHouse;
+  if (stream != NULL) {
+    fprintf(stream, "Id,LotArea,Street,SalePrice,Neighborhood,YearBuilt,OverallQual,OverallCond,KitchenQual\n");
+    if (limit == LIMITLESS) {
+      while (head != NULL)  {
+        fprintf(stream,
+                "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
+                head->id,
+                head->lotarea,
+                head->street,
+                head->saleprice,
+                head->neighborhood,
+                head->yearbuilt,
+                head->overallqual,
+                head->overallcond,
+                convert_kitchenqual_back(head->kitchenqual)
+              );
+        head = head->nextHouse;
+      }
+    } else {
+      for (int i = 0; head != NULL && i < limit; i++)  {
+        fprintf(stream,
+                "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
+                head->id,
+                head->lotarea,
+                head->street,
+                head->saleprice,
+                head->neighborhood,
+                head->yearbuilt,
+                head->overallqual,
+                head->overallcond,
+                convert_kitchenqual_back(head->kitchenqual)
+              );
+        head = head->nextHouse;
+      }
     }
+    fclose(stream);
   } else {
-    for (int i = 0; head != NULL && i < limit; i++)  {
-      fprintf(stream,
-              "%d,%d,%s,%d,%s,%d,%d,%d,%s\n", //Alınan evin verisini yazdırıyoruz
-              head->id,
-              head->lotarea,
-              head->street,
-              head->saleprice,
-              head->neighborhood,
-              head->yearbuilt,
-              head->overallqual,
-              head->overallcond,
-              convert_kitchenqual_back(head->kitchenqual)
-            );
-      head = head->nextHouse;
-    }
+    printf(RED "\nHATA : Yazilacak dosya acilamadi\n" RESET);
   }
 
-  fclose(stream);
+  
   
 }
 
@@ -475,7 +485,7 @@ void mean_sale_prices (House * ht[], int criter) {
   if( criter == NEIGHBORHOOD) {
     House * tmp;
     int sum, count, color;
-    sum = color = count;
+    sum = color = count = 0;
     printf(CYAN"\n\n%-20s%-15s%-15s", "Kriter Degeri", "Ev Sayisi", "Ortalama Fiyat");
     for(int i = 0; i < HASH_TABLE_SIZE_TYPE_NEIGHBOR; i++) {
       
@@ -491,6 +501,8 @@ void mean_sale_prices (House * ht[], int criter) {
         } else {
           printf(BLUE "\n%-20s%-15d%-15d", ht[i]->neighborhood, count, sum/count);
         }
+        sum = 0;
+        count = 0;
         color++;
       }
       

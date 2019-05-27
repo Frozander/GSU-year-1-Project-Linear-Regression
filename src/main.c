@@ -146,12 +146,12 @@ int main(int argc,char * argv[]){
 
   //Ev verilerinin belgelerden okunmasi
   if (!read_house_from_file(csv_train_data_directory, housesById, housesByNeighbor, TRAIN)) {
-    printf(RED "\nDosya Okuma Hatasi\n" RESET);
+    printf(RED "\nDosya Okuma Hatasi - Programdan Cikiliyor\n" RESET);
     menu = EXIT;
   }
 
   if (!read_house_from_file(csv_test_data_directory, housesById_test, housesByNeighbor_test, TEST)) {
-    printf(RED "\nDosya Okuma Hatasi\n" RESET);
+    printf(RED "\nDosya Okuma Hatasi - Programdan Cikiliyor\n" RESET);
     menu = EXIT;
   }
   
