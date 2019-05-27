@@ -842,16 +842,16 @@ int main(int argc,char * argv[]){
       
 
       printf(GREEN "\n\nBenzerlik ile sıfır çıkanlar dahil\n\n");
-      printf(GREEN "\nEv :" MAGENTA " %d\n", l);
-      printf(GREEN "\nBernzerlik :" MAGENTA " %d\n", sum_benzerlik);
-      printf(GREEN "\nMatrix :" MAGENTA " %d\n", sum_matrix);
-      printf(GREEN "\nFark :" MAGENTA " %d\n", sum_matrix - sum_benzerlik);
+      printf(GREEN "\nEv Sayisi :" MAGENTA " %d\n", l);
+      printf(GREEN "\nBernzerlik tahminlerinin asil fiyattan farklarinin toplami :" MAGENTA " %d\n", sum_benzerlik);
+      printf(GREEN "\nMatrix tahminlerinin asil fiyattan farklarinin toplami :" MAGENTA " %d\n", sum_matrix);
+      printf(GREEN "\nIki toplamin farki :" MAGENTA " %d\n", sum_matrix - sum_benzerlik);
 
       printf(GREEN "\n\nBenzerlik ile sıfır çıkanlar dahil edilmeden\n\n");
-      printf(GREEN "\nEv :" MAGENTA " %d\n", count_igg);
-      printf(GREEN "\nBernzerlik :" MAGENTA " %d\n", sum_benzerlik_igg);
-      printf(GREEN "\nMatrix :" MAGENTA " %d\n", sum_matrix_igg);
-      printf(GREEN "\nFark :" MAGENTA " %d\n", sum_matrix_igg - sum_benzerlik_igg);
+      printf(GREEN "\nEv Sayisi :" MAGENTA " %d\n", count_igg);
+      printf(GREEN "\nBernzerlik tahminlerinin asil fiyattan farklarinin toplami :" MAGENTA " %d\n", sum_benzerlik_igg);
+      printf(GREEN "\nMatrix tahminlerinin asil fiyattan farklarinin toplami :" MAGENTA " %d\n", sum_matrix_igg);
+      printf(GREEN "\nIki toplamin farki :" MAGENTA " %d\n", sum_matrix_igg - sum_benzerlik_igg);
       menu = ANA_MENU;
 
     } else {
